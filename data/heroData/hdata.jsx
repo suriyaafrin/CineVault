@@ -1,0 +1,73 @@
+export const genres = [
+  "All Genres",
+  "Action",
+  "Adventure",
+  "Drama",
+  "Thriller",
+  "Horror",
+  "Sci-Fi",
+  "Fantasy",
+  "Comedy",
+  "Romance",
+];
+
+export const movies = [
+  {
+    id: 1,
+    title: "The Batman",
+    year: "2022",
+    genre: "Action",
+    rating: "8.5",
+    badge: "New",
+    posterBg: "linear-gradient(145deg, #1a0508, #3d0010)",
+    icon: "🦇",
+  },
+  {
+    id: 2,
+    title: "Oppenheimer",
+    year: "2023",
+    genre: "Drama",
+    rating: "8.9",
+    badge: "Top 10",
+    posterBg: "linear-gradient(145deg, #1a1000, #3d2800)",
+    icon: "💥",
+  },
+  {
+    id: 3,
+    title: "Dune: Part Two",
+    year: "2024",
+    genre: "Sci-Fi",
+    rating: "8.7",
+    badge: "New",
+    posterBg: "linear-gradient(145deg, #1a1200, #40300a)",
+    icon: "🪱",
+  },
+  {
+    id: 4,
+    title: "Interstellar",
+    year: "2014",
+    genre: "Sci-Fi",
+    rating: "8.7",
+    posterBg: "linear-gradient(145deg, #04101a, #08284a)",
+    icon: "🌌",
+  },
+  {
+    id: 5,
+    title: "Parasite",
+    year: "2019",
+    genre: "Thriller",
+    rating: "8.5",
+    badge: "Award",
+    posterBg: "linear-gradient(145deg, #0a0a0a, #1e1e1e)",
+    icon: "👁️",
+  },
+];
+export const featured = {
+  title: "THE BATMAN",
+  year: "2022",
+  runtime: "2h 56m",
+  genres: "Action, Crime, Drama",
+  rating: "8.7",
+  description:
+    "When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate the city's hidden corruption and question his own family's involvement.",
+};
