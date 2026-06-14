@@ -2,6 +2,9 @@ import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { create } from "zustand";
 import CineVaultLogo from "../../img-folder/navbarImg";
+import { FiSearch } from "react-icons/fi";
+import { FiX } from "react-icons/fi"; 
+import { FiMenu } from "react-icons/fi";
 
 const useSearchStore = create((set) => ({
   query: "",
@@ -30,13 +33,13 @@ export default function Navbar() {
   return (
     <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-
-        {/* Logo */}
-        <NavLink to="/" className="flex items-center gap-2 text-[#C8102E] font-bold text-2xl select-none shrink-0">
+        <NavLink
+          to="/"
+          className="flex items-center gap-2 text-[#C8102E] font-bold text-2xl select-none shrink-0"
+        >
           <CineVaultLogo />
         </NavLink>
 
-        {/* Desktop Nav Links */}
         <ul className="hidden md:flex items-center">
           {navLinks.map(({ label, href }) => (
             <li key={href}>
@@ -54,11 +57,8 @@ export default function Navbar() {
             </li>
           ))}
         </ul>
-
-        {/* Right Side */}
         <div className="hidden md:flex items-center gap-2">
-          {/* Search */}
-          <div className="flex items-center gap-1.5 bg-gray-100 border border-gray-200 rounded-md px-3 h-9">
+          <div className="flex items-center gap-1.5 bg-gray-100 border border-gray-200 hover:border-[#C8102E] rounded-md px-3 h-9">
             <input
               type="text"
               value={query}
@@ -67,9 +67,15 @@ export default function Navbar() {
               placeholder="Search movies, series..."
               className="bg-transparent text-[14px] outline-none w-36 lg:w-52 text-gray-800 placeholder-gray-400"
             />
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+            {query ? (
+              <FiX
+                size={15}
+                className="text-gray-400 cursor-pointer hover:text-[#C8102E] transition-colors"
+                onClick={() => setQuery("")}
+              />
+            ) : (
+              <FiSearch size={15} className="text-gray-400" />
+            )}
           </div>
 
           {/* Sign In */}
@@ -89,37 +95,58 @@ export default function Navbar() {
           onClick={() => setMenuOpen((prev) => !prev)}
           aria-label="Toggle menu"
         >
-          {menuOpen ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          )}
+          {menuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
         </button>
       </div>
 
       {/* Mobile Menu */}
+      {/* Overlay */}
       {menuOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white px-4 py-4 flex flex-col gap-1">
-          {navLinks.map(({ label, href }) => (
-            <NavLink
-              key={href}
-              to={href}
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) =>
-                `text-[15px] font-semibold py-2.5 px-2 rounded-md transition-colors ` +
-                (isActive ? "text-[#C8102E] bg-red-50" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50")
-              }
-            >
-              {label}
-            </NavLink>
-          ))}
+        <div
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
 
-          {/* Mobile Search */}
-          <div className="flex items-center gap-1.5 bg-gray-100 border border-gray-200 rounded-md px-3 h-10 mt-2">
+      {/* Drawer from right */}
+      <div
+        className={`fixed top-0 right-0 h-full w-72 bg-white z-50 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out md:hidden
+    ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
+      >
+        {/* Drawer Header */}
+        <div className="flex items-center justify-between px-5 h-16 border-b border-gray-100">
+          <span className="text-[#C8102E] font-bold text-lg">CineVault</span>
+          <button
+            onClick={() => setMenuOpen(false)}
+            className="text-gray-500 p-1"
+          >
+            <FiX size={22} />
+          </button>
+        </div>
+
+        {/* Nav Links */}
+        <div className="flex-1 px-4 py-3 overflow-y-auto">
+          <ul className="flex flex-col gap-1">
+            {navLinks.map(({ label, href }) => (
+              <li key={href}>
+                <NavLink
+                  to={href}
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `block py-3 px-3 text-[15px] font-semibold rounded-lg transition-colors ` +
+                    (isActive
+                      ? "text-[#C8102E] bg-red-50"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50")
+                  }
+                >
+                  {label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+
+          {/* Search */}
+          <div className="flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-lg px-3 h-10 mt-3">
             <input
               type="text"
               value={query}
@@ -128,22 +155,20 @@ export default function Navbar() {
               placeholder="Search movies, series..."
               className="bg-transparent text-[14px] outline-none flex-1 text-gray-800 placeholder-gray-400"
             />
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-          </div>
-
-          {/* Mobile Buttons */}
-          <div className="flex gap-2 mt-2">
-            <button className="flex-1 h-10 text-[14px] font-semibold text-[#C8102E] border-[1.5px] border-[#C8102E] rounded-md hover:bg-red-50 transition-colors">
-              Sign In
-            </button>
-            <button className="flex-1 h-10 text-[14px] font-semibold text-white bg-[#C8102E] rounded-md hover:bg-[#a80d25] transition-colors">
-              Join Now
-            </button>
+            <FiSearch size={15} color="#9ca3af" />
           </div>
         </div>
-      )}
+
+        {/* Footer Buttons */}
+        <div className="px-4 py-4 flex flex-col gap-2 border-t border-gray-100">
+          <button className="h-11 text-[14px] font-semibold text-[#C8102E] border-[1.5px] border-[#C8102E] rounded-lg hover:bg-red-50 transition-colors">
+            Sign In
+          </button>
+          <button className="h-11 text-[14px] font-semibold text-white bg-[#C8102E] rounded-lg hover:bg-[#a80d25] transition-colors">
+            Join Now
+          </button>
+        </div>
+      </div>
     </nav>
   );
 }
