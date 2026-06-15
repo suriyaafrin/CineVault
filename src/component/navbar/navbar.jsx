@@ -78,18 +78,18 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Sign In */}
+
           <button className="h-9 px-3 lg:px-4 text-[14px] font-semibold text-[#C8102E] border-[1.5px] border-[#C8102E] rounded-md hover:bg-red-50 transition-colors whitespace-nowrap">
             Sign In
           </button>
 
-          {/* Join Now */}
+
           <button className="h-9 px-3 lg:px-4 text-[14px] font-semibold text-white bg-[#C8102E] rounded-md hover:bg-[#a80d25] transition-colors whitespace-nowrap">
             Join Now
           </button>
         </div>
 
-        {/* Mobile Hamburger */}
+
         <button
           className="md:hidden text-gray-600 p-1"
           onClick={() => setMenuOpen((prev) => !prev)}
@@ -99,8 +99,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Menu */}
-      {/* Overlay */}
+
       {menuOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-40 md:hidden"
@@ -108,12 +107,13 @@ export default function Navbar() {
         />
       )}
 
-      {/* Drawer from right */}
+
       <div
         className={`fixed top-0 right-0 h-full w-72 bg-white z-50 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out md:hidden
     ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
       >
-        {/* Drawer Header */}
+        
+
         <div className="flex items-center justify-between px-5 h-16 border-b border-gray-100">
           <span className="text-[#C8102E] font-bold text-lg">CineVault</span>
           <button
@@ -124,7 +124,6 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Nav Links */}
         <div className="flex-1 px-4 py-3 overflow-y-auto">
           <ul className="flex flex-col gap-1">
             {navLinks.map(({ label, href }) => (
@@ -145,7 +144,7 @@ export default function Navbar() {
             ))}
           </ul>
 
-          {/* Search */}
+          
           <div className="flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-lg px-3 h-10 mt-3">
             <input
               type="text"
@@ -155,11 +154,19 @@ export default function Navbar() {
               placeholder="Search movies, series..."
               className="bg-transparent text-[14px] outline-none flex-1 text-gray-800 placeholder-gray-400"
             />
-            <FiSearch size={15} color="#9ca3af" />
+            {query ? (
+              <FiX
+                size={15}
+                className="text-gray-400 cursor-pointer hover:text-[#C8102E] transition-colors"
+                onClick={() => setQuery("")}
+              />
+            ) : (
+              <FiSearch size={15} className="text-gray-400" />
+            )}
           </div>
         </div>
 
-        {/* Footer Buttons */}
+        
         <div className="px-4 py-4 flex flex-col gap-2 border-t border-gray-100">
           <button className="h-11 text-[14px] font-semibold text-[#C8102E] border-[1.5px] border-[#C8102E] rounded-lg hover:bg-red-50 transition-colors">
             Sign In

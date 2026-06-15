@@ -23,7 +23,7 @@ export function ScrollRow({ children, className = "" }) {
       <div
         ref={rowRef}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        className={`flex gap-3 overflow-x-auto scroll-smooth px-8 ${className}`}
+        className={`flex gap-3 overflow-x-auto scroll-smooth px-0 ${className}`}
       >
         {children}
       </div>
