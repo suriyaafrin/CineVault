@@ -7,6 +7,8 @@ import { GiBat } from "react-icons/gi";
 import MovieCard from "./MovieCard";
 import GenreFilter from "./genre";
 import { ScrollRow } from "./scrollRow";
+import TrendingSection from "./tranding";
+import ContinueWatching from "./continue-Watching";
 
 
 
@@ -16,16 +18,11 @@ export default function CineVaultHero() {
 
   return (
     <div className="bg-white min-h-screen font-sans">
-     
       <div className="relative overflow-hidden bg-white">
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_75%_50%,rgba(200,16,46,0.07)_0%,transparent_65%)]" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-14 flex flex-col gap-8 sm:gap-10">
-
-         
           <div className="flex flex-col-reverse sm:flex-row items-center sm:items-center justify-between gap-6 sm:gap-10">
-
-            
             <div className="flex-1 w-full max-w-xl z-10 text-center sm:text-left">
               <span className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded border mb-4 sm:mb-5 text-[#C8102E] border-[#C8102E]">
                 Featured Movie
@@ -62,19 +59,23 @@ export default function CineVaultHero() {
               </div>
             </div>
 
-    
             <div className="z-10 shrink-0">
               <div className="w-40 h-60 sm:w-64 sm:h-96 rounded-2xl flex flex-col items-center justify-center gap-3 shadow-2xl bg-[linear-gradient(145deg,#1a0508,#3d0010)] shadow-[0_20px_60px_rgba(200,16,46,0.25),0_4px_24px_rgba(0,0,0,0.15)]">
-                <div className="text-4xl sm:text-5xl text-[#C8102E] opacity-80"><GiBat /></div>
-                <div className="text-white font-bold text-xs sm:text-sm tracking-widest text-center leading-tight uppercase">
-                  The<br />Batman
+                <div className="text-4xl sm:text-5xl text-[#C8102E] opacity-80">
+                  <GiBat />
                 </div>
-                <div className="text-xs tracking-widest uppercase text-[#C8102E]">2022</div>
+                <div className="text-white font-bold text-xs sm:text-sm tracking-widest text-center leading-tight uppercase">
+                  The
+                  <br />
+                  Batman
+                </div>
+                <div className="text-xs tracking-widest uppercase text-[#C8102E]">
+                  2022
+                </div>
               </div>
             </div>
           </div>
 
-    
           <div className="w-full h-48 sm:h-56">
             <ScrollRow>
               {movies.map((movie) => (
@@ -87,11 +88,12 @@ export default function CineVaultHero() {
               ))}
             </ScrollRow>
           </div>
-
         </div>
       </div>
 
-      <GenreFilter/>
+      <GenreFilter />
+      <TrendingSection />
+      <ContinueWatching/>
     </div>
   );
 }
