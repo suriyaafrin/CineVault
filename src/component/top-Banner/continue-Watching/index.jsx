@@ -101,7 +101,6 @@ export default function ContinueWatching() {
             ))}
           </div>
 
-          {/* Right arrow */}
           <button
             onClick={() => scroll(1)}
             className="absolute -right-4 top-1/3 -translate-y-1/2 z-10 bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity shadow-md"
