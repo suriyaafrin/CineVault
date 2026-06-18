@@ -11,7 +11,7 @@ const Top10Card = ({ movie }) => {
       className="flex items-end cursor-pointer group"
       onClick={() => setActiveId(isActive ? null : movie.id)}
     >
-      {/* Big rank number — overlaps poster slightly */}
+      
       <span
         className="text-6xl font-black leading-none select-none z-10 -mr-3"
         style={{
@@ -23,10 +23,10 @@ const Top10Card = ({ movie }) => {
         {rank}
       </span>
 
-      {/* Poster */}
+     
       <div
-        className={`relative w-38 h-45 rounded overflow-hidden border-2 shrink-0 transition-all duration-200 z-20 ${
-          isActive ? "border-[#C8102E]" : "border-transparent group-hover:border-gray-500"
+        className={`relative w-40 h-48 rounded overflow-hidden border-2 shrink-0 transition-all duration-200 z-20 ${
+          isActive ? "border-[#C8102E]" : "border-transparent group-hover:border-[#C8102E]"
         }`}
       >
         <img
@@ -35,7 +35,6 @@ const Top10Card = ({ movie }) => {
           className="w-full h-full object-cover"
         />
 
-        {/* Title overlay at bottom */}
         <div className="absolute bottom-0 left-0 right-0 bg-black/70 px-1 py-0.5">
           <p className="text-white text-[9px] font-semibold leading-tight line-clamp-2">
             {movie.title}

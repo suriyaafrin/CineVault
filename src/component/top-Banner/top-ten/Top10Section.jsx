@@ -2,8 +2,9 @@ import { useState } from "react";
 import { MdChevronRight } from "react-icons/md";
 
 import Top10Card from "./top10Card";
-import Top10Modal from "./Top10Modal";
+
 import { top10Movies } from "../../../../data/top10Data/top10Data";
+import Top10Modal from "./top10Modal";
 
 const Top10Section = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -11,7 +12,7 @@ const Top10Section = () => {
   return (
     <section className="w-full py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
-        {/* Header */}
+        
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[#C8102E] text-[21px] font-bold">
             Top 10 this month
@@ -24,15 +25,12 @@ const Top10Section = () => {
           </button>
         </div>
 
-        {/* Fixed grid row — no scroll */}
-        <div className="grid grid-cols-10 gap-50">
-          {top10Movies.slice(0, 6).map((movie) => (
+        <div className="flex gap-6">
+          {top10Movies.slice(0, 5).map((movie) => (
             <Top10Card key={movie.id} movie={movie} />
           ))}
         </div>
       </div>
-
-      {/* Modal */}
       {modalOpen && <Top10Modal onClose={() => setModalOpen(false)} />}
     </section>
   );
