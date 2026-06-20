@@ -10,6 +10,7 @@ import { ScrollRow } from "./scrollRow";
 import TrendingSection from "./tranding";
 import ContinueWatching from "./continue-Watching";
 import Top10Section from "./top-ten/Top10Section";
+import NewReleasesSection from "./newReleaseSec/newRelease";
 
 export default function CineVaultHero() {
   const [activeGenre, setActiveGenre] = useState("All Genres");
@@ -94,6 +95,7 @@ export default function CineVaultHero() {
       <TrendingSection />
       <ContinueWatching />
       <Top10Section />
+      <NewReleasesSection/>
     </div>
   );
 }

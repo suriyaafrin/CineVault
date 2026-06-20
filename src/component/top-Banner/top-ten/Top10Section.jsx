@@ -25,7 +25,7 @@ const Top10Section = () => {
           </button>
         </div>
 
-        <div className="flex gap-6">
+        <div className="grid grid-cols-5 gap-3 lg:gap-6">
           {top10Movies.slice(0, 5).map((movie) => (
             <Top10Card key={movie.id} movie={movie} />
           ))}

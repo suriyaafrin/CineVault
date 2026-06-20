@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { create } from "zustand";
 import { FaChevronRight } from "react-icons/fa";
 import WatchCard from "./watchCard";
+import ContinueWatchingModal from "./ContinueWatchingModal";
 
 
 
@@ -54,6 +55,7 @@ export const useWatchStore = create((set) => ({
 export default function ContinueWatching() {
   const items = useWatchStore((s) => s.items);
   const scrollRef = useRef(null);
+  const [showModal, setShowModal] = useState(false);
 
   const scroll = (dir) => {
     scrollRef.current?.scrollBy({ left: dir * 240, behavior: "smooth" });
@@ -76,7 +78,10 @@ export default function ContinueWatching() {
      
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[21px] font-bold text-[#C8102E]">Continue Watching</h2>
-          <button className="flex items-center gap-1 text-[13px] text-[#C8102E] hover:opacity-80 transition-opacity">
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-1 text-[13px] text-[#C8102E] hover:opacity-80 transition-opacity"
+          >
             View All <FaChevronRight size={11} />
           </button>
         </div>
@@ -110,6 +115,10 @@ export default function ContinueWatching() {
         </div>
 
       </div>
+
+      {showModal && (
+        <ContinueWatchingModal onClose={() => setShowModal(false)} />
+      )}
     </section>
   );
 }
