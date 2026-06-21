@@ -1,16 +1,10 @@
 
-
-// Generalized page shared by both the /movies and /series routes.
-// Each route's page component (pages/movies/movies.jsx,
-// pages/series/series.jsx) renders this and just passes its own
-
 import ExploreSidebar from "./exploreSidebar";
 import FilterSidebar from "./filterSidebar";
 import GenreTabs from "./genreTab";
 import MovieGrid from "./movieGrid";
 import Pagination from "./pagination";
 
-// `type` prop — no route param needed since routes stay /movies and /series.
 export default function ExploreContent({ type = "movie" }) {
   const isSeries = type === "series";
   const label = isSeries ? "Series" : "Movies";
@@ -35,7 +29,7 @@ export default function ExploreContent({ type = "movie" }) {
           <Pagination totalPages={10} />
         </main>
 
-        <ExploreSidebar />
+        <ExploreSidebar type={isSeries ? "series" : "movie"} />
       </div>
     </div>
   );

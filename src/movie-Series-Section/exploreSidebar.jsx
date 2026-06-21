@@ -1,12 +1,22 @@
-import { collections, newAdditions } from "../../data/movieData/movieData";
+import {
+  collections as movieCollections,
+  newAdditions as movieNewAdditions,
+} from "../../data/movieData/movieData";
+import {
+  collections as seriesCollections,
+  newAdditions as seriesNewAdditions,
+} from "../../data/seriesData/seriesData";
 
+export default function ExploreSidebar({ type = "movie" }) {
+  const isSeries = type === "series";
+  const collections = isSeries ? seriesCollections : movieCollections;
+  const newAdditions = isSeries ? seriesNewAdditions : movieNewAdditions;
 
-export default function ExploreSidebar() {
   return (
     <aside className="space-y-8">
       <div>
         <h2 className="text-sm font-bold text-gray-900 mb-3">
-          Top Movie Collections
+          Top {isSeries ? "Series" : "Movie"} Collections
         </h2>
         <ul className="space-y-3">
           {collections.map((col) => (

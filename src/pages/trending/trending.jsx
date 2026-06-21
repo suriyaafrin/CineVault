@@ -1,9 +1,11 @@
 import React from 'react'
+import TrendingContent from '../../tranding-Content'
+
 
 function Trending() {
   return (
     <div>
-      <h1>Trending</h1>
+      <TrendingContent/>
     </div>
   )
 }

@@ -2,18 +2,20 @@ import { useMemo } from "react";
 import MovieCard from "./movieMovieCard";
 import { useExploreStore } from "./useExploreStore";
 import { movies } from "../../data/movieData/movieData";
-
+import { series } from "../../data/seriesData/seriesData";
 
 const PAGE_SIZE = 20;
 
-export default function MovieGrid() {
+export default function MovieGrid({ type = "movie" }) {
   const activeGenre = useExploreStore((state) => state.activeGenre);
   const sortBy = useExploreStore((state) => state.sortBy);
   const ageRating = useExploreStore((state) => state.ageRating);
   const currentPage = useExploreStore((state) => state.currentPage);
 
+  const sourceData = type === "series" ? series : movies;
+
   const filteredMovies = useMemo(() => {
-    let result = movies;
+    let result = sourceData;
 
     if (activeGenre !== "All Genres") {
       result = result.filter((movie) => movie.genres.includes(activeGenre));
@@ -34,7 +36,7 @@ export default function MovieGrid() {
     // "Popularity" left as dataset order — swap in a real popularity field later.
 
     return sorted;
-  }, [activeGenre, sortBy, ageRating]);
+  }, [sourceData, activeGenre, sortBy, ageRating]);
 
   const start = (currentPage - 1) * PAGE_SIZE;
   const pageMovies = filteredMovies.slice(start, start + PAGE_SIZE);
@@ -42,7 +44,7 @@ export default function MovieGrid() {
   if (pageMovies.length === 0) {
     return (
       <div className="py-16 text-center text-gray-500">
-        No movies match these filters. Try a different genre or rating.
+        No {type === "series" ? "series" : "movies"} match these filters. Try a different genre or rating.
       </div>
     );
   }

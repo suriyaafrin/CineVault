@@ -1,8 +1,3 @@
-// Standalone series data, mirroring src/data/movieData/movieData.js.
-// Lives in its own folder so series content can be added/edited
-// independently of movies. Shared genres/ageRatings now live in
-// src/data/exploreFilters.js so both content types use one filter set.
-
 export const series = [
   {
     id: 101,
@@ -12,7 +7,7 @@ export const series = [
     episodes: 9,
     genres: ["Drama", "Horror"],
     rating: 8.8,
-    ageRating: "TV-MA",
+    ageRating: "R",
     posterUrl: "/posters/the-last-of-us.jpg",
   },
   {
@@ -23,7 +18,7 @@ export const series = [
     episodes: 32,
     genres: ["Fantasy", "Action"],
     rating: 7.8,
-    ageRating: "TV-MA",
+    ageRating: "R",
     posterUrl: "/posters/the-witcher.jpg",
   },
   {
@@ -34,7 +29,7 @@ export const series = [
     episodes: 1,
     genres: ["Action"],
     rating: 7.8,
-    ageRating: "TV-14",
+    ageRating: "PG-13",
     posterUrl: "/posters/john-wick-4.jpg",
   },
   {
@@ -45,7 +40,7 @@ export const series = [
     episodes: 42,
     genres: ["Sci-Fi", "Horror", "Drama"],
     rating: 8.7,
-    ageRating: "TV-14",
+    ageRating: "PG-13",
     posterUrl: "/posters/stranger-things.jpg",
   },
   {
@@ -56,7 +51,20 @@ export const series = [
     episodes: 24,
     genres: ["Action", "Sci-Fi"],
     rating: 8.8,
-    ageRating: "TV-PG",
+    ageRating: "PG-13",
     posterUrl: "/posters/spider-man-series.jpg",
   },
+];
+
+export const collections = [
+  { id: 1, title: "Prestige Drama Collection", meta: "2024 · 6 items" },
+  { id: 2, title: "Marvel TV Universe", meta: "5 series · 3 seasons" },
+  { id: 3, title: "Fantasy Sagas", meta: "158 · 2 items" },
+  { id: 4, title: "Anthology Picks", meta: "87 · 12 items" },
+];
+
+export const newAdditions = [
+  { id: 1, title: "Stranger Things", poster: "/posters/stranger-things.jpg" },
+  { id: 2, title: "The Last of Us", poster: "/posters/the-last-of-us.jpg" },
+  { id: 3, title: "The Witcher", poster: "/posters/the-witcher.jpg" },
 ];
