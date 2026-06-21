@@ -1,11 +1,8 @@
-import React from 'react'
+// Thin wrapper so the /series route stays exactly as-is in your router —
 
-function Series() {
-  return (
-    <div>
-      <h1>Series</h1>
-    </div>
-  )
+import ExploreContent from "../../movie-Series-Section/exploreMovies";
+
+// all the real layout/grid/filter logic lives in ExploreContent.jsx.
+export default function Series() {
+  return <ExploreContent type="series" />;
 }
-
-export default Series
