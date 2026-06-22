@@ -33,8 +33,7 @@ export default function MovieGrid({ type = "movie" }) {
     } else if (sortBy === "Year") {
       sorted.sort((a, b) => b.year - a.year);
     }
-    // "Popularity" left as dataset order — swap in a real popularity field later.
-
+    
     return sorted;
   }, [sourceData, activeGenre, sortBy, ageRating]);
 

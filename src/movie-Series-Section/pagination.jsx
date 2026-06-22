@@ -31,7 +31,7 @@ export default function Pagination({ totalPages = 10 }) {
             className={`w-8 h-8 rounded-md font-medium transition-colors ${
               page === currentPage
                 ? "bg-[#C8102E] text-white"
-                : "text-gray-700 hover:bg-gray-100"
+                : "text-[#C8102E] hover:bg-gray-100"
             }`}
           >
             {page}

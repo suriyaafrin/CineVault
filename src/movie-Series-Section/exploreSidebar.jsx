@@ -15,7 +15,7 @@ export default function ExploreSidebar({ type = "movie" }) {
   return (
     <aside className="space-y-8">
       <div>
-        <h2 className="text-sm font-bold text-gray-900 mb-3">
+        <h2 className="text-sm font-bold text-[#C8102E] mb-3">
           Top {isSeries ? "Series" : "Movie"} Collections
         </h2>
         <ul className="space-y-3">
@@ -34,7 +34,7 @@ export default function ExploreSidebar({ type = "movie" }) {
       </div>
 
       <div>
-        <h2 className="text-sm font-bold text-gray-900 mb-3">New Additions</h2>
+        <h2 className="text-sm font-bold text-[#C8102E] mb-3">New Additions</h2>
         <div className="space-y-3">
           {newAdditions.map((item) => (
             <div

@@ -18,7 +18,7 @@ export default function GenreTabs() {
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
               isActive
                 ? "bg-[#C8102E] text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                : "bg-gray-100 text-[#C8102E] hover:bg-gray-200"
             }`}
           >
             {genre}

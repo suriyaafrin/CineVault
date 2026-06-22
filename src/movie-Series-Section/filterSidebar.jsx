@@ -14,13 +14,13 @@ export default function FilterSidebar() {
   return (
     <div className="flex flex-wrap items-end gap-6">
       <div className="flex flex-col gap-1">
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <span className="text-xs font-semibold text-[#C8102E] uppercase tracking-wide">
           Sort By
         </span>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="border border-gray-300 rounded-md px-3 py-1.5 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#C8102E]/40"
+          className="border border-[#C8102E] rounded-md px-3 py-1.5 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#C8102E]/40"
         >
           {sortOptions.map((option) => (
             <option key={option} value={option}>
@@ -31,13 +31,13 @@ export default function FilterSidebar() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <span className="text-xs font-semibold text-[#C8102E] uppercase tracking-wide">
           Year
         </span>
         <select
           value={yearRange}
           onChange={(e) => setYearRange(e.target.value)}
-          className="border border-gray-300 rounded-md px-3 py-1.5 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#C8102E]/40"
+          className="border border-[#C8102E] rounded-md px-3 py-1.5 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#C8102E]/40"
         >
           {yearOptions.map((option) => (
             <option key={option} value={option}>
@@ -48,13 +48,13 @@ export default function FilterSidebar() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <span className="text-xs font-semibold text-[#C8102E] uppercase tracking-wide">
           Age Rating
         </span>
         <select
           value={ageRating}
           onChange={(e) => setAgeRating(e.target.value)}
-          className="border border-gray-300 rounded-md px-3 py-1.5 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#C8102E]/40"
+          className="border border-[#C8102E] rounded-md px-3 py-1.5 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#C8102E]/40"
         >
           {ageRatings.map((option) => (
             <option key={option} value={option}>
