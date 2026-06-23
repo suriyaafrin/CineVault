@@ -23,7 +23,7 @@ export default function ExploreSidebar({ type = "movie" }) {
             <li key={col.id} className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-md bg-gray-900 shrink-0" />
               <div>
-                <p className="text-sm font-medium text-gray-900 leading-tight">
+                <p className="text-sm font-medium text-[#C8102E] leading-tight">
                   {col.title}
                 </p>
                 <p className="text-xs text-gray-400">{col.meta}</p>
