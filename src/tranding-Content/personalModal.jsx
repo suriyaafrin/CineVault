@@ -1,12 +1,12 @@
 import { createPortal } from "react-dom";
+import { FaPlay } from "react-icons/fa";
 import { usePersonalStore } from "./usePersonalStore";
-
 
 function PersonalModal() {
   const personalItems = usePersonalStore((state) => state.personalItems);
   const activePersonalId = usePersonalStore((state) => state.activePersonalId);
   const closePersonalModal = usePersonalStore(
-    (state) => state.closePersonalModal
+    (state) => state.closePersonalModal,
   );
 
   if (activePersonalId === null) return null;
@@ -59,10 +59,24 @@ function PersonalModal() {
               {item.reason}
             </span>
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              // TODO: hook this up to your actual watch/player route
+              console.log("Watch now:", item.id);
+            }}
+            className="w-full mt-4 bg-[#C8102E] text-white text-sm font-semibold
+                       py-2.5 rounded-lg hover:bg-[#a80d26] transition-colors
+                       flex items-center justify-center gap-2"
+          >
+            <FaPlay size={14} />
+            Watch Now
+          </button>
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
 

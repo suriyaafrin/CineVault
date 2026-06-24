@@ -1,9 +1,10 @@
 import React from 'react'
+import WishHiro from '../../wishList'
 
 function MyList() {
   return (
     <div>
-      <h1>My List</h1>
+      <WishHiro/>
     </div>
   )
 }

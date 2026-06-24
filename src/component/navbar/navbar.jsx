@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { NavLink, useNavigate } from "react-router-dom";
 import { create } from "zustand";
 import CineVaultLogo from "../../img-folder/navbarImg";
 import { FiSearch } from "react-icons/fi";
-import { FiX } from "react-icons/fi"; 
+import { FiX } from "react-icons/fi";
 import { FiMenu } from "react-icons/fi";
+import { FiUser } from "react-icons/fi";
+import { FiCheck } from "react-icons/fi";
+import SignInModal from "./signInModal";
+import SuccessModal from "./successModal";
 
 const useSearchStore = create((set) => ({
   query: "",
@@ -18,16 +23,51 @@ const navLinks = [
   { label: "Trending", href: "/trending" },
   { label: "My List", href: "/my-list" },
 ];
-
 export default function Navbar() {
   const { query, setQuery } = useSearchStore();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [authMode, setAuthMode] = useState("signin"); // which tab the modal opens on
+  const [successInfo, setSuccessInfo] = useState(null); // { title, message } | null
+  const [user, setUser] = useState(null); // null = logged out, string = display name/email
   const navigate = useNavigate();
 
   const handleSearch = (e) => {
     if (e.key === "Enter" && query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query.trim())}`);
     }
+  };
+
+  const openSignIn = () => {
+    setAuthMode("signin");
+    setShowSignIn(true);
+  };
+
+  const openSignUp = () => {
+    setAuthMode("signup");
+    setShowSignIn(true);
+  };
+
+  const handleSignIn = ({ name, email, mode }) => {
+    setShowSignIn(false);
+    setMenuOpen(false);
+    setUser(name || email);
+
+    if (mode === "signup") {
+      setSuccessInfo({
+        title: "Account created!",
+        message: `Welcome to CineVault, ${name}. Your account is ready to go.`,
+      });
+    } else {
+      setSuccessInfo({
+        title: "Signed in",
+        message: "Welcome back to CineVault.",
+      });
+    }
+  };
+
+  const handleSignOut = () => {
+    setUser(null);
   };
 
   return (
@@ -78,17 +118,33 @@ export default function Navbar() {
             )}
           </div>
 
+          {user ? (
+            <button
+              onClick={handleSignOut}
+              className="h-9 px-3 lg:px-4 text-[14px] font-semibold text-[#111] border-[1.5px] border-gray-200 rounded-md hover:border-[#C8102E] hover:text-[#C8102E] transition-colors whitespace-nowrap flex items-center gap-1.5"
+              title="Click to sign out"
+            >
+              <FiUser size={14} />
+              <span className="max-w-25 truncate">{user}</span>
+            </button>
+          ) : (
+            <button
+              onClick={openSignIn}
+              className="h-9 px-3 lg:px-4 text-[14px] font-semibold text-[#C8102E] border-[1.5px] border-[#C8102E] rounded-md hover:bg-red-50 transition-colors whitespace-nowrap"
+            >
+              Sign In
+            </button>
+          )}
 
-          <button className="h-9 px-3 lg:px-4 text-[14px] font-semibold text-[#C8102E] border-[1.5px] border-[#C8102E] rounded-md hover:bg-red-50 transition-colors whitespace-nowrap">
-            Sign In
-          </button>
-
-
-          <button className="h-9 px-3 lg:px-4 text-[14px] font-semibold text-white bg-[#C8102E] rounded-md hover:bg-[#a80d25] transition-colors whitespace-nowrap">
-            Join Now
-          </button>
+          {!user && (
+            <button
+              onClick={openSignUp}
+              className="h-9 px-3 lg:px-4 text-[14px] font-semibold text-white bg-[#C8102E] rounded-md hover:bg-[#a80d25] transition-colors whitespace-nowrap"
+            >
+              Join Now
+            </button>
+          )}
         </div>
-
 
         <button
           className="md:hidden text-gray-600 p-1"
@@ -99,7 +155,6 @@ export default function Navbar() {
         </button>
       </div>
 
-
       {menuOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-40 md:hidden"
@@ -107,13 +162,10 @@ export default function Navbar() {
         />
       )}
 
-
       <div
         className={`fixed top-0 right-0 h-full w-72 bg-white z-50 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out md:hidden
     ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
       >
-        
-
         <div className="flex items-center justify-between px-5 h-16 border-b border-gray-100">
           <span className="text-[#C8102E] font-bold text-lg">CineVault</span>
           <button
@@ -144,7 +196,6 @@ export default function Navbar() {
             ))}
           </ul>
 
-          
           <div className="flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-lg px-3 h-10 mt-3">
             <input
               type="text"
@@ -166,16 +217,49 @@ export default function Navbar() {
           </div>
         </div>
 
-        
         <div className="px-4 py-4 flex flex-col gap-2 border-t border-gray-100">
-          <button className="h-11 text-[14px] font-semibold text-[#C8102E] border-[1.5px] border-[#C8102E] rounded-lg hover:bg-red-50 transition-colors">
-            Sign In
-          </button>
-          <button className="h-11 text-[14px] font-semibold text-white bg-[#C8102E] rounded-lg hover:bg-[#a80d25] transition-colors">
-            Join Now
-          </button>
+          {user ? (
+            <button
+              onClick={handleSignOut}
+              className="h-11 text-[14px] font-semibold text-[#111] border-[1.5px] border-gray-200 rounded-lg hover:border-[#C8102E] hover:text-[#C8102E] transition-colors flex items-center justify-center gap-2"
+            >
+              <FiUser size={15} />
+              <span className="truncate">{user} — Sign Out</span>
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={openSignIn}
+                className="h-11 text-[14px] font-semibold text-[#C8102E] border-[1.5px] border-[#C8102E] rounded-lg hover:bg-red-50 transition-colors"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={openSignUp}
+                className="h-11 text-[14px] font-semibold text-white bg-[#C8102E] rounded-lg hover:bg-[#a80d25] transition-colors"
+              >
+                Join Now
+              </button>
+            </>
+          )}
         </div>
       </div>
+
+      {showSignIn && (
+        <SignInModal
+          defaultMode={authMode}
+          onClose={() => setShowSignIn(false)}
+          onSignIn={handleSignIn}
+        />
+      )}
+
+      {successInfo && (
+        <SuccessModal
+          title={successInfo.title}
+          message={successInfo.message}
+          onClose={() => setSuccessInfo(null)}
+        />
+      )}
     </nav>
   );
 }
