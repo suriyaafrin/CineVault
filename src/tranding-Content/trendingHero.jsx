@@ -2,13 +2,19 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { FaPlay, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { trendingHeroItems } from "../../data/trendingData/trendingData";
 
+
+import MovieDetailModal from "../component/top-Banner/newReleaseSec/movieDetailModal";
+
 const AUTO_ADVANCE_MS = 5000;
 
 const TrendingHero = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [activeItemId, setActiveItemId] = useState(null);
   const trackRef = useRef(null);
   const total = trendingHeroItems.length;
+
+  const activeItem = trendingHeroItems.find((item) => item.id === activeItemId);
 
   const goTo = useCallback(
     (index) => {
@@ -20,7 +26,6 @@ const TrendingHero = () => {
   const goNext = useCallback(() => goTo(activeIndex + 1), [activeIndex, goTo]);
   const goPrev = useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
 
- 
   useEffect(() => {
     if (isPaused) return;
 
@@ -45,9 +50,9 @@ const TrendingHero = () => {
         {trendingHeroItems.map((item) => (
           <div
             key={item.id}
-            className="relative w-full shrink-0 aspect-video sm:aspect-16/7 lg:aspect-16/5"
+            className="relative w-full shrink-0 aspect-video sm:aspect-16/7 lg:aspect-16/5 cursor-pointer"
+            onClick={() => setActiveItemId(item.id)}
           >
-          
             <img
               src={item.backdrop}
               alt={item.title}
@@ -63,12 +68,15 @@ const TrendingHero = () => {
             <button
               type="button"
               aria-label={`Play ${item.title}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveItemId(item.id);
+              }}
               className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition hover:scale-105 hover:bg-white/30"
             >
               <FaPlay className="ml-0.5 h-5 w-5" />
             </button>
 
-            
             <div className="absolute inset-x-0 bottom-0 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
               <p className="mb-1 text-xs font-bold uppercase tracking-wider text-[#C8102E]">
                 Trending Now
@@ -117,6 +125,14 @@ const TrendingHero = () => {
           />
         ))}
       </div>
+
+      {activeItem && (
+        <MovieDetailModal
+          movie={{ ...activeItem, posterUrl: activeItem.backdrop, genre: activeItem.genres?.join(", ") }}
+          onClose={() => setActiveItemId(null)}
+         
+        />
+      )}
     </section>
   );
 };

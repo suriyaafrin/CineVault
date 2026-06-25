@@ -1,8 +1,13 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaChevronRight } from "react-icons/fa";
 
 import MovieCard from "../MovieCard";
 import { ScrollRow } from "../scrollRow";
+
+
+import MovieDetailModal from "../newReleaseSec/movieDetailModal";
+
 
 const mockMovies = [
   { id: 1, title: "Oppenheimer", year: 2023, genre: "Drama", rating: 8.8, badge: "MOVIE", poster: "https://image.tmdb.org/t/p/w300/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg" },
@@ -15,8 +20,11 @@ const mockMovies = [
 ];
 
 export default function TrendingSection({ movies = mockMovies }) {
+  const [activeId, setActiveId] = useState(null);
+  const activeMovie = movies.find((movie) => movie.id === activeId);
+
   return (
-    <section className="py-6 w-full">
+    <section className="py-6 w-full relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-[21px] font-bold text-[#C8102E]">Trending this week</h2>
@@ -30,10 +38,23 @@ export default function TrendingSection({ movies = mockMovies }) {
 
         <ScrollRow>
           {movies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
+            <MovieCard
+              key={movie.id}
+              movie={movie}
+              isActive={activeId === movie.id}
+              onClick={() => setActiveId(movie.id)}
+            />
           ))}
         </ScrollRow>
       </div>
+
+      {activeMovie && (
+        <MovieDetailModal
+          movie={activeMovie}
+          onClose={() => setActiveId(null)}
+          
+        />
+      )}
     </section>
   );
 }

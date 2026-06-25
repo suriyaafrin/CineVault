@@ -3,13 +3,14 @@ import { MdClose } from "react-icons/md";
 import { BsFillPlayCircleFill } from "react-icons/bs";
 import { useWatchStore } from ".";
 
-function WatchCard({ item }) {
+function WatchCard({ item, onClick }) {
   const [hovered, setHovered] = useState(false);
   const removeItem = useWatchStore((s) => s.removeItem);
 
   return (
     <div
       className="relative flex-none w-56 group cursor-pointer"
+      onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -48,7 +49,6 @@ function WatchCard({ item }) {
         />
       </div>
 
-     
       <div className="mt-1.5">
         <span className="text-gray-900 text-xs font-semibold truncate block">
           {item.title}

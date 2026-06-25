@@ -131,3 +131,12 @@ export default function ContinueWatchingModal({ onClose }) {
     document.body
   );
 }
+
+
+function outer(){
+  let a= 100
+  function inner(){
+    console.log(a);
+  }
+  return inner;
+}

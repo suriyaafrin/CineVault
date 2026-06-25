@@ -3,7 +3,8 @@ import { create } from "zustand";
 import { FaChevronRight } from "react-icons/fa";
 import WatchCard from "./watchCard";
 import ContinueWatchingModal from "./ContinueWatchingModal";
-
+import MovieDetailModal from "../newReleaseSec/movieDetailModal";
+import { formatDuration } from "../../../utils/formateDuration";
 
 
 export const useWatchStore = create((set) => ({
@@ -47,15 +48,13 @@ export const useWatchStore = create((set) => ({
     })),
 }));
 
-
-
-
-
-
 export default function ContinueWatching() {
   const items = useWatchStore((s) => s.items);
   const scrollRef = useRef(null);
   const [showModal, setShowModal] = useState(false);
+  const [activeId, setActiveId] = useState(null);
+
+  const activeItem = items.find((item) => item.id === activeId);
 
   const scroll = (dir) => {
     scrollRef.current?.scrollBy({ left: dir * 240, behavior: "smooth" });
@@ -72,10 +71,9 @@ export default function ContinueWatching() {
   }
 
   return (
-    <section className="py-6 w-full">
+    <section className="py-6 w-full relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
 
-     
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[21px] font-bold text-[#C8102E]">Continue Watching</h2>
           <button
@@ -86,7 +84,6 @@ export default function ContinueWatching() {
           </button>
         </div>
 
-      
         <div className="relative group/row">
           <button
             onClick={() => scroll(-1)}
@@ -95,14 +92,17 @@ export default function ContinueWatching() {
             ‹
           </button>
 
-          
           <div
             ref={scrollRef}
             className="flex gap-4 overflow-x-auto pb-2 scroll-smooth"
             style={{ scrollbarWidth: "none" }}
           >
             {items.map((item) => (
-              <WatchCard key={item.id} item={item} />
+              <WatchCard
+                key={item.id}
+                item={item}
+                onClick={() => setActiveId(item.id)}
+              />
             ))}
           </div>
 
@@ -118,6 +118,14 @@ export default function ContinueWatching() {
 
       {showModal && (
         <ContinueWatchingModal onClose={() => setShowModal(false)} />
+      )}
+
+      {activeItem && (
+        <MovieDetailModal
+          movie={{ ...activeItem, posterUrl: activeItem.thumbnail }}
+          onClose={() => setActiveId(null)}
+          formatDuration={formatDuration}
+        />
       )}
     </section>
   );
