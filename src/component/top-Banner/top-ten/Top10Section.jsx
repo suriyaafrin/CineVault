@@ -10,6 +10,7 @@ const Top10Section = () => {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
+    
     <section className="w-full py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         

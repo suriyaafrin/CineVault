@@ -2,7 +2,7 @@ import { createPortal } from "react-dom";
 import { useEffect } from "react";
 import { MdClose } from "react-icons/md";
 import { BsFillPlayCircleFill } from "react-icons/bs";
-import { useWatchStore } from "./index";
+import { useWatchStore } from "../continue-Watching/index";
 
 function ProgressBar({ progress }) {
   return (
@@ -20,7 +20,10 @@ function FeaturedRow({ item, onPlay }) {
     <div className="px-6 pt-2 pb-5">
       <div
         className="relative rounded-xl overflow-hidden aspect-video bg-gray-200 cursor-pointer group"
-        onClick={onPlay}
+        onClick={(e) => {
+          e.stopPropagation();
+          onPlay();
+        }}
       >
         <img
           src={item.thumbnail}
@@ -54,7 +57,13 @@ function FeaturedRow({ item, onPlay }) {
 
 function GridCard({ item, onPlay }) {
   return (
-    <div className="cursor-pointer" onClick={onPlay}>
+    <div
+      className="cursor-pointer"
+      onClick={(e) => {
+        e.stopPropagation();
+        onPlay();
+      }}
+    >
       <div className="relative rounded-xl overflow-hidden aspect-video bg-gray-200 group">
         <img
           src={item.thumbnail}
@@ -82,7 +91,14 @@ function GridCard({ item, onPlay }) {
   );
 }
 
-export default function ContinueWatchingModal({ onClose }) {
+// NOTE: This component no longer owns its own "which movie is open" state.
+// Previously it had its own activeId + rendered its own MovieDetailModal,
+// completely disconnected from ContinueWatching's activeId. That meant
+// clicking a card inside this grid never told the parent anything, so the
+// parent's MovieDetailModal never opened. Now this component just reports
+// the click upward via onSelectMovie, and the parent (ContinueWatching) is
+// the single source of truth for which MovieDetailModal is shown.
+export default function ContinueWatchingModal({ onClose, onSelectMovie }) {
   const items = useWatchStore((s) => s.items);
 
   useEffect(() => {
@@ -117,12 +133,16 @@ export default function ContinueWatchingModal({ onClose }) {
           </button>
         </div>
 
-        <FeaturedRow item={featured} onPlay={onClose} />
+        <FeaturedRow item={featured} onPlay={() => onSelectMovie(featured.id)} />
 
         {rest.length > 0 && (
           <div className="px-6 pb-6 grid grid-cols-2 gap-4">
             {rest.map((item) => (
-              <GridCard key={item.id} item={item} onPlay={onClose} />
+              <GridCard
+                key={item.id}
+                item={item}
+                onPlay={() => onSelectMovie(item.id)}
+              />
             ))}
           </div>
         )}
@@ -130,13 +150,4 @@ export default function ContinueWatchingModal({ onClose }) {
     </div>,
     document.body
   );
-}
-
-
-function outer(){
-  let a= 100
-  function inner(){
-    console.log(a);
-  }
-  return inner;
 }
