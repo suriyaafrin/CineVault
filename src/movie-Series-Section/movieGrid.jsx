@@ -6,7 +6,7 @@ import { series } from "../../data/seriesData/seriesData";
 
 const PAGE_SIZE = 20;
 
-export default function MovieGrid({ type = "movie" }) {
+export default function MovieGrid({ type = "movie", onMovieClick }) {
   const activeGenre = useExploreStore((state) => state.activeGenre);
   const sortBy = useExploreStore((state) => state.sortBy);
   const ageRating = useExploreStore((state) => state.ageRating);
@@ -33,7 +33,7 @@ export default function MovieGrid({ type = "movie" }) {
     } else if (sortBy === "Year") {
       sorted.sort((a, b) => b.year - a.year);
     }
-    
+
     return sorted;
   }, [sourceData, activeGenre, sortBy, ageRating]);
 
@@ -51,7 +51,11 @@ export default function MovieGrid({ type = "movie" }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       {pageMovies.map((movie) => (
-        <MovieCard key={movie.id} movie={movie} />
+        <MovieCard
+          key={movie.id}
+          movie={movie}
+          onClick={() => onMovieClick?.(movie)}
+        />
       ))}
     </div>
   );

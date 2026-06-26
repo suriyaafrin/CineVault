@@ -11,10 +11,14 @@ import TrendingSection from "./tranding";
 import ContinueWatching from "./continue-Watching";
 import Top10Section from "./top-ten/Top10Section";
 import NewReleasesSection from "./newReleaseSec/newRelease";
+import MovieDetailModal from "./newReleaseSec/movieDetailModal";
+import { formatDuration } from "../../utils/formateDuration";
 
 export default function CineVaultHero() {
   const [activeGenre, setActiveGenre] = useState("All Genres");
   const [activeMovieId, setActiveMovieId] = useState(null);
+
+  const activeMovie = movies.find((movie) => movie.id === activeMovieId);
 
   return (
     <div className="bg-white min-h-screen font-sans">
@@ -95,7 +99,15 @@ export default function CineVaultHero() {
       <TrendingSection />
       <ContinueWatching />
       <Top10Section />
-      <NewReleasesSection/>
+      <NewReleasesSection />
+
+      {activeMovie && (
+        <MovieDetailModal
+          movie={activeMovie}
+          onClose={() => setActiveMovieId(null)}
+          formatDuration={formatDuration}
+        />
+      )}
     </div>
   );
 }

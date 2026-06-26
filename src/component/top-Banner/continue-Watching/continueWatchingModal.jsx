@@ -91,13 +91,7 @@ function GridCard({ item, onPlay }) {
   );
 }
 
-// NOTE: This component no longer owns its own "which movie is open" state.
-// Previously it had its own activeId + rendered its own MovieDetailModal,
-// completely disconnected from ContinueWatching's activeId. That meant
-// clicking a card inside this grid never told the parent anything, so the
-// parent's MovieDetailModal never opened. Now this component just reports
-// the click upward via onSelectMovie, and the parent (ContinueWatching) is
-// the single source of truth for which MovieDetailModal is shown.
+
 export default function ContinueWatchingModal({ onClose, onSelectMovie }) {
   const items = useWatchStore((s) => s.items);
 

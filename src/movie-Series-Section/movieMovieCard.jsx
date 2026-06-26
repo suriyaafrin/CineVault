@@ -1,6 +1,6 @@
-export default function MovieCard({ movie }) {
+export default function MovieCard({ movie, onClick }) {
   return (
-    <div className="group cursor-pointer">
+    <div className="group cursor-pointer" onClick={onClick}>
       <div className="relative aspect-2/3 rounded-lg overflow-hidden bg-gray-100">
         <img
           src={movie.poster}

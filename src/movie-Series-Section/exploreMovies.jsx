@@ -1,13 +1,19 @@
-
+import { useState } from "react";
 import ExploreSidebar from "./exploreSidebar";
 import FilterSidebar from "./filterSidebar";
 import GenreTabs from "./genreTab";
 import MovieGrid from "./movieGrid";
 import Pagination from "./pagination";
 
+
+import MovieDetailModal from "../component/top-Banner/newReleaseSec/movieDetailModal";
+import { formatDuration } from "../utils/formateDuration";
+
 export default function ExploreContent({ type = "movie" }) {
   const isSeries = type === "series";
   const label = isSeries ? "Series" : "Movies";
+
+  const [activeMovie, setActiveMovie] = useState(null);
 
   return (
     <div className="min-h-screen bg-white px-6 py-6">
@@ -25,12 +31,23 @@ export default function ExploreContent({ type = "movie" }) {
             <FilterSidebar />
           </div>
 
-          <MovieGrid type={isSeries ? "series" : "movie"} />
+          <MovieGrid
+            type={isSeries ? "series" : "movie"}
+            onMovieClick={setActiveMovie}
+          />
           <Pagination totalPages={10} />
         </main>
 
         <ExploreSidebar type={isSeries ? "series" : "movie"} />
       </div>
+
+      {activeMovie && (
+        <MovieDetailModal
+          movie={activeMovie}
+          onClose={() => setActiveMovie(null)}
+          formatDuration={formatDuration}
+        />
+      )}
     </div>
   );
 }

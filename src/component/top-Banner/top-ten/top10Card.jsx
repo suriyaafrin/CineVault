@@ -1,6 +1,5 @@
 import useTop10Store from "./useTop10Store";
 
-
 const Top10Card = ({ movie }) => {
   const { activeId, setActiveId } = useTop10Store();
   const isActive = activeId === movie.id;
@@ -9,9 +8,11 @@ const Top10Card = ({ movie }) => {
   return (
     <div
       className="flex items-end cursor-pointer group"
-      onClick={() => setActiveId(isActive ? null : movie.id)}
+      onClick={() => {
+        console.log("Card clicked, setting id:", movie.id);
+        setActiveId(isActive ? null : movie.id);
+      }}
     >
-      
       <span
         className="text-6xl font-black leading-none select-none z-10 -mr-3"
         style={{
@@ -23,10 +24,11 @@ const Top10Card = ({ movie }) => {
         {rank}
       </span>
 
-     
       <div
         className={`relative w-40 h-48 rounded overflow-hidden border-2 shrink-0 transition-all duration-200 z-20 ${
-          isActive ? "border-[#C8102E]" : "border-transparent group-hover:border-[#C8102E]"
+          isActive
+            ? "border-[#C8102E]"
+            : "border-transparent group-hover:border-[#C8102E]"
         }`}
       >
         <img
@@ -39,7 +41,9 @@ const Top10Card = ({ movie }) => {
           <p className="text-white text-[9px] font-semibold leading-tight line-clamp-2">
             {movie.title}
           </p>
-          <p className="text-yellow-400 text-[9px] font-bold">⭐ {movie.rating}</p>
+          <p className="text-yellow-400 text-[9px] font-bold">
+            ⭐ {movie.rating}
+          </p>
         </div>
       </div>
     </div>

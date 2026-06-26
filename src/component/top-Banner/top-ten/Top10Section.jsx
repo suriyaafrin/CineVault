@@ -2,18 +2,22 @@ import { useState } from "react";
 import { MdChevronRight } from "react-icons/md";
 
 import Top10Card from "./top10Card";
+import Top10Modal from "./top10Modal";
+import useTop10Store from "./useTop10Store";
 
 import { top10Movies } from "../../../../data/top10Data/top10Data";
-import Top10Modal from "./top10Modal";
+
+import MovieDetailModal from "../newReleaseSec/movieDetailModal";
+import { formatDuration } from "../../../utils/formateDuration";
 
 const Top10Section = () => {
   const [modalOpen, setModalOpen] = useState(false);
+  const { activeId, setActiveId } = useTop10Store();
+  const activeMovie = top10Movies.find((movie) => movie.id === activeId);
 
   return (
-    
     <section className="w-full py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
-        
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[#C8102E] text-[21px] font-bold">
             Top 10 this month
@@ -32,7 +36,16 @@ const Top10Section = () => {
           ))}
         </div>
       </div>
+
       {modalOpen && <Top10Modal onClose={() => setModalOpen(false)} />}
+
+      {activeMovie && (
+        <MovieDetailModal
+          movie={activeMovie}
+          onClose={() => setActiveId(null)}
+          formatDuration={formatDuration}
+        />
+      )}
     </section>
   );
 };
