@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
-import { FaTimes, FaPlay, FaBookmark, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import MovieCard from "../movieCard";
+import {
+  FaTimes,
+  FaPlay,
+  FaBookmark,
+  FaChevronLeft,
+  FaChevronRight,
+} from "react-icons/fa";
+import MovieCard from "../MovieCard";
 import MovieDetailModal from "./movieDetailModal";
 
 const PER_PAGE = 18;
@@ -13,16 +19,24 @@ const AllNewReleasesModal = ({ isOpen, onClose, movies = [] }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState(null);
 
-  const genres = ["all", ...new Set(movies.map((m) => m.genre).filter(Boolean))];
-  const years = ["all", ...new Set(movies.map((m) => String(m.year)).filter(Boolean)).values()].sort((a, b) => b - a);
+  const genres = [
+    "all",
+    ...new Set(movies.map((m) => m.genre).filter(Boolean)),
+  ];
+  const years = [
+    "all",
+    ...new Set(movies.map((m) => String(m.year)).filter(Boolean)).values(),
+  ].sort((a, b) => b - a);
 
   useEffect(() => {
     let result = [...movies];
     if (genre !== "all") result = result.filter((m) => m.genre === genre);
     if (year !== "all") result = result.filter((m) => String(m.year) === year);
     if (sort === "rating") result.sort((a, b) => b.rating - a.rating);
-    else if (sort === "title") result.sort((a, b) => a.title.localeCompare(b.title));
-    else if (sort === "duration") result.sort((a, b) => a.duration - b.duration);
+    else if (sort === "title")
+      result.sort((a, b) => a.title.localeCompare(b.title));
+    else if (sort === "duration")
+      result.sort((a, b) => a.duration - b.duration);
     else result.sort((a, b) => b.year - a.year);
     setFiltered(result);
     setCurrentPage(1);
@@ -31,7 +45,10 @@ const AllNewReleasesModal = ({ isOpen, onClose, movies = [] }) => {
   if (!isOpen) return null;
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
-  const paginated = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
+  const paginated = filtered.slice(
+    (currentPage - 1) * PER_PAGE,
+    currentPage * PER_PAGE,
+  );
 
   const formatDuration = (mins) => {
     if (!mins) return "";
@@ -44,12 +61,13 @@ const AllNewReleasesModal = ({ isOpen, onClose, movies = [] }) => {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="relative w-full max-w-5xl bg-white rounded-2xl border border-black/10 overflow-hidden shadow-2xl">
-
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-black/10">
           <h2 className="text-[#C8102E] text-lg font-bold">All New Releases</h2>
           <div className="flex items-center gap-3">
-            <span className="text-black/40 text-sm">{filtered.length} titles</span>
+            <span className="text-black/40 text-sm">
+              {filtered.length} titles
+            </span>
             <button
               onClick={onClose}
               className="w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center text-black/70 transition-colors"
@@ -98,11 +116,17 @@ const AllNewReleasesModal = ({ isOpen, onClose, movies = [] }) => {
         {/* Grid */}
         <div className="p-6">
           {paginated.length === 0 ? (
-            <div className="text-center py-16 text-black/30 text-sm">No titles match your filters.</div>
+            <div className="text-center py-16 text-black/30 text-sm">
+              No titles match your filters.
+            </div>
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
               {paginated.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} onClick={() => setSelectedMovie(movie)} />
+                <MovieCard
+                  key={movie.id}
+                  movie={movie}
+                  onClick={() => setSelectedMovie(movie)}
+                />
               ))}
             </div>
           )}
@@ -153,9 +177,5 @@ const AllNewReleasesModal = ({ isOpen, onClose, movies = [] }) => {
     </div>
   );
 };
-
-
-
-
 
 export default AllNewReleasesModal;

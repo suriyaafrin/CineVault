@@ -1,4 +1,4 @@
-const MovieCard = ({ movie, onClick }) => (
+export const MovieCard = ({ movie, onClick }) => (
   <div
     onClick={onClick}
     className="relative rounded-lg overflow-hidden cursor-pointer group aspect-[2/3] bg-[#1a1a1f]"
@@ -26,4 +26,3 @@ const MovieCard = ({ movie, onClick }) => (
     </div>
   </div>
 );
-export default MovieCard;

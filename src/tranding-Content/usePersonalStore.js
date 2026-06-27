@@ -3,7 +3,7 @@ import { create } from "zustand";
 // Mirrors useGlobalStore / useCommunityStore shape.
 // In a real app, swap personalItems for a personalized API
 // call keyed off the logged-in user's watch history.
-const personalItems = [
+export const personalItems = [
   {
     id: 1,
     rank: 1,

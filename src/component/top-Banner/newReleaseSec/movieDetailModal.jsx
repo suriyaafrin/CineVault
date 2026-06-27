@@ -4,7 +4,7 @@ import { FaBookmark, FaPlay, FaTimes } from "react-icons/fa";
 const MovieDetailModal = ({ movie, onClose, formatDuration }) =>
   createPortal(
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-6"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-60 p-6"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bg-white rounded-xl border border-black/10 w-full max-w-md overflow-hidden shadow-2xl">

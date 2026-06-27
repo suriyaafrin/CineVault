@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { newReleasesData } from "../../../../data/newReleaseData/data";
-import MovieCard from "../movieCard";
+import MovieCard from "../MovieCard";
 import { ScrollRow } from "../scrollRow";
 import AllNewReleasesModal from "./allNewReleasesModal";
 import MovieDetailModal from "./movieDetailModal";
@@ -29,7 +29,11 @@ const NewReleasesSection = () => {
         </div>
         <ScrollRow>
           {newReleasesData.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} onClick={() => setSelectedMovie(movie)} />
+            <MovieCard
+              key={movie.id}
+              movie={movie}
+              onClick={() => setSelectedMovie(movie)}
+            />
           ))}
         </ScrollRow>
 

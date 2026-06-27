@@ -1,9 +1,9 @@
 import { createPortal } from "react-dom";
 import { FaPlay } from "react-icons/fa";
-import { usePersonalStore } from "./usePersonalStore";
-
+// import { usePersonalStore } from "./usePersonalStoree";
+import {usePersonalStore} from "./usePersonalStore"
 function PersonalModal() {
-  const personalItems = usePersonalStore((state) => state.personalItems);
+  const personalItems = usePersonalStore ((state) => state.personalItems);
   const activePersonalId = usePersonalStore((state) => state.activePersonalId);
   const closePersonalModal = usePersonalStore(
     (state) => state.closePersonalModal,
@@ -23,7 +23,7 @@ function PersonalModal() {
         className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative aspect-[16/9]">
+        <div className="relative aspect-video">
           <img
             src={item.image}
             alt={item.title}
