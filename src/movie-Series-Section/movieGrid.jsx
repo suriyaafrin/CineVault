@@ -1,44 +1,89 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import MovieCard from "./movieMovieCard";
 import { useExploreStore } from "./useExploreStore";
-import { movies } from "../../data/movieData/movieData";
-import { series } from "../../data/seriesData/seriesData";
+import { discoverMovies, discoverTV, getImageUrl } from "../services/tmdb";
 
-const PAGE_SIZE = 20;
+const SORT_MAP = {
+  Popularity: "popularity.desc",
+  Rating: "vote_average.desc",
+  Year: "primary_release_date.desc",
+};
+
+function parseYearRange(yearRange) {
+  const [start, end] = yearRange.split("-").map((s) => s.trim());
+  return { yearGte: start, yearLte: end };
+}
 
 export default function MovieGrid({ type = "movie", onMovieClick }) {
-  const activeGenre = useExploreStore((state) => state.activeGenre);
+  const activeGenreId = useExploreStore((state) => state.activeGenreId);
   const sortBy = useExploreStore((state) => state.sortBy);
+  const yearRange = useExploreStore((state) => state.yearRange);
   const ageRating = useExploreStore((state) => state.ageRating);
   const currentPage = useExploreStore((state) => state.currentPage);
 
-  const sourceData = type === "series" ? series : movies;
+  const [pageMovies, setPageMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredMovies = useMemo(() => {
-    let result = sourceData;
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
 
-    if (activeGenre !== "All Genres") {
-      result = result.filter((movie) => movie.genres.includes(activeGenre));
+    async function loadDiscover() {
+      try {
+        const { yearGte, yearLte } = parseYearRange(yearRange);
+
+        const params = {
+          page: currentPage,
+          sortBy: SORT_MAP[sortBy] || "popularity.desc",
+          genreId: activeGenreId,
+          yearGte,
+          yearLte,
+        };
+
+        // Age rating only applies to movies — TV uses a different cert scheme
+        if (type !== "series" && ageRating !== "All") {
+          params.certification = ageRating;
+        }
+
+        const data =
+          type === "series" ? await discoverTV(params) : await discoverMovies(params);
+
+        if (!isMounted) return;
+
+        const mapped = (data.results || []).map((item) => ({
+          id: item.id,
+          title: item.title || item.name,
+          posterUrl: getImageUrl(item.poster_path),
+          overview: item.overview,
+          releaseDate: item.release_date || item.first_air_date,
+          rating: item.vote_average,
+          genre_ids: item.genre_ids,
+        }));
+
+        setPageMovies(mapped);
+      } catch (err) {
+        console.error("Failed to fetch discover results:", err);
+        setPageMovies([]);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
     }
 
-    if (ageRating !== "All") {
-      result = result.filter((movie) => movie.ageRating === ageRating);
-    }
+    loadDiscover();
+    return () => {
+      isMounted = false;
+    };
+  }, [type, activeGenreId, sortBy, yearRange, ageRating, currentPage]);
 
-    const sorted = [...result];
-    if (sortBy === "A-Z") {
-      sorted.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortBy === "Rating") {
-      sorted.sort((a, b) => b.rating - a.rating);
-    } else if (sortBy === "Year") {
-      sorted.sort((a, b) => b.year - a.year);
-    }
-
-    return sorted;
-  }, [sourceData, activeGenre, sortBy, ageRating]);
-
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const pageMovies = filteredMovies.slice(start, start + PAGE_SIZE);
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div key={i} className="aspect-2/3 bg-gray-200 rounded-lg animate-pulse" />
+        ))}
+      </div>
+    );
+  }
 
   if (pageMovies.length === 0) {
     return (

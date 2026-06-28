@@ -1,8 +1,5 @@
-import { useState, useRef } from "react";
-import { featured, genres, movies } from "../../../data/heroData/hdata";
+import { useState, useEffect } from "react";
 import { FaPlay } from "react-icons/fa";
-import { FaChevronLeft } from "react-icons/fa";
-import { FaChevronRight } from "react-icons/fa";
 import { GiBat } from "react-icons/gi";
 import MovieCard from "./MovieCard";
 import GenreFilter from "./genre";
@@ -13,12 +10,116 @@ import Top10Section from "./top-ten/Top10Section";
 import NewReleasesSection from "./newReleaseSec/newRelease";
 import MovieDetailModal from "./newReleaseSec/movieDetailModal";
 import { formatDuration } from "../../utils/formateDuration";
+// import {
+//   fetchTrending,
+//   getPopularMovies,
+//   getMovieDetails,
+//   getImageUrl,
+// } from "../../../services/tmdb";
+import {
+  fetchTrending,
+  getPopularMovies,
+  getMovieDetails,
+  getImageUrl,
+} from "../../services/tmdb"
 
 export default function CineVaultHero() {
   const [activeGenre, setActiveGenre] = useState("All Genres");
   const [activeMovieId, setActiveMovieId] = useState(null);
 
+  const [featured, setFeatured] = useState(null);
+  const [featuredLoading, setFeaturedLoading] = useState(true);
+
+  const [movies, setMovies] = useState([]);
+  const [rowLoading, setRowLoading] = useState(true);
+
   const activeMovie = movies.find((movie) => movie.id === activeMovieId);
+
+  // Featured hero — #1 from Trending (this week)
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadFeatured() {
+      try {
+        const trending = await fetchTrending("movie", "week");
+        const top = trending.results?.[0];
+        if (!top || !isMounted) return;
+
+        const details = await getMovieDetails(top.id);
+        if (!isMounted) return;
+
+        setFeatured({
+          id: details.id,
+          title: details.title,
+          posterUrl: getImageUrl(details.poster_path),
+          year: details.release_date ? details.release_date.slice(0, 4) : "",
+          runtime: details.runtime ? formatDuration(details.runtime) : "",
+          genres: (details.genres || []).map((g) => g.name).join(", "),
+          rating: details.vote_average,
+          description: details.overview,
+          videos: details.videos,
+        });
+      } catch (err) {
+        console.error("Failed to fetch featured movie:", err);
+      } finally {
+        if (isMounted) setFeaturedLoading(false);
+      }
+    }
+
+    loadFeatured();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Row below hero — Popular movies
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadPopular() {
+      try {
+        const data = await getPopularMovies();
+        if (!isMounted) return;
+
+        const mapped = data.results.map((movie) => ({
+          id: movie.id,
+          title: movie.title,
+          posterUrl: getImageUrl(movie.poster_path),
+          overview: movie.overview,
+          releaseDate: movie.release_date,
+          rating: movie.vote_average,
+          genre_ids: movie.genre_ids,
+        }));
+
+        setMovies(mapped);
+      } catch (err) {
+        console.error("Failed to fetch popular movies:", err);
+      } finally {
+        if (isMounted) setRowLoading(false);
+      }
+    }
+
+    loadPopular();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleWatchNow = () => {
+    if (!featured?.videos?.results) return;
+    const trailer =
+      featured.videos.results.find(
+        (v) => v.site === "YouTube" && v.type === "Trailer"
+      ) || featured.videos.results.find((v) => v.site === "YouTube");
+
+    if (trailer) {
+      window.open(
+        `https://www.youtube.com/watch?v=${trailer.key}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
+  };
 
   return (
     <div className="bg-white min-h-screen font-sans">
@@ -32,28 +133,50 @@ export default function CineVaultHero() {
                 Featured Movie
               </span>
 
-              <h1 className="text-3xl sm:text-5xl font-black tracking-tight mb-3 sm:mb-4 leading-none text-[#111]">
-                {featured.title}
-              </h1>
+              {featuredLoading || !featured ? (
+                <div className="space-y-3 animate-pulse">
+                  <div className="h-10 w-3/4 bg-gray-200 rounded mx-auto sm:mx-0" />
+                  <div className="h-4 w-1/2 bg-gray-200 rounded mx-auto sm:mx-0" />
+                  <div className="h-16 w-full bg-gray-200 rounded" />
+                </div>
+              ) : (
+                <>
+                  <h1 className="text-3xl sm:text-5xl font-black tracking-tight mb-3 sm:mb-4 leading-none text-[#111]">
+                    {featured.title}
+                  </h1>
 
-              <div className="flex items-center justify-center sm:justify-start gap-2 text-sm text-gray-500 mb-3 sm:mb-4 flex-wrap">
-                <span>{featured.year}</span>
-                <span className="text-gray-300">·</span>
-                <span>{featured.runtime}</span>
-                <span className="text-gray-300">·</span>
-                <span>{featured.genres}</span>
-                <span className="text-gray-300">·</span>
-                <span className="flex items-center gap-1 font-semibold text-[#C8102E]">
-                  ★ {featured.rating}
-                </span>
-              </div>
+                  <div className="flex items-center justify-center sm:justify-start gap-2 text-sm text-gray-500 mb-3 sm:mb-4 flex-wrap">
+                    <span>{featured.year}</span>
+                    {featured.runtime && (
+                      <>
+                        <span className="text-gray-300">·</span>
+                        <span>{featured.runtime}</span>
+                      </>
+                    )}
+                    {featured.genres && (
+                      <>
+                        <span className="text-gray-300">·</span>
+                        <span>{featured.genres}</span>
+                      </>
+                    )}
+                    <span className="text-gray-300">·</span>
+                    <span className="flex items-center gap-1 font-semibold text-[#C8102E]">
+                      ★ {featured.rating?.toFixed(1)}
+                    </span>
+                  </div>
 
-              <p className="text-gray-500 text-sm leading-relaxed mb-6 sm:mb-7 max-w-md mx-auto sm:mx-0">
-                {featured.description}
-              </p>
+                  <p className="text-gray-500 text-sm leading-relaxed mb-6 sm:mb-7 max-w-md mx-auto sm:mx-0">
+                    {featured.description}
+                  </p>
+                </>
+              )}
 
               <div className="flex gap-3 justify-center sm:justify-start">
-                <button className="flex items-center gap-2 px-5 sm:px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#C8102E] transition-all hover:opacity-90 active:scale-95">
+                <button
+                  onClick={handleWatchNow}
+                  disabled={featuredLoading}
+                  className="flex items-center gap-2 px-5 sm:px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#C8102E] transition-all hover:opacity-90 active:scale-95 disabled:opacity-50"
+                >
                   <FaPlay size={14} color="white" />
                   Watch Now
                 </button>
@@ -64,32 +187,39 @@ export default function CineVaultHero() {
             </div>
 
             <div className="z-10 shrink-0">
-              <div className="w-40 h-60 sm:w-64 sm:h-96 rounded-2xl flex flex-col items-center justify-center gap-3 shadow-2xl bg-[linear-gradient(145deg,#1a0508,#3d0010)] shadow-[0_20px_60px_rgba(200,16,46,0.25),0_4px_24px_rgba(0,0,0,0.15)]">
-                <div className="text-4xl sm:text-5xl text-[#C8102E] opacity-80">
-                  <GiBat />
+              {featuredLoading || !featured?.posterUrl ? (
+                <div className="w-40 h-60 sm:w-64 sm:h-96 rounded-2xl flex flex-col items-center justify-center gap-3 shadow-2xl bg-[linear-gradient(145deg,#1a0508,#3d0010)] shadow-[0_20px_60px_rgba(200,16,46,0.25),0_4px_24px_rgba(0,0,0,0.15)] animate-pulse">
+                  <div className="text-4xl sm:text-5xl text-[#C8102E] opacity-80">
+                    <GiBat />
+                  </div>
                 </div>
-                <div className="text-white font-bold text-xs sm:text-sm tracking-widest text-center leading-tight uppercase">
-                  The
-                  <br />
-                  Batman
-                </div>
-                <div className="text-xs tracking-widest uppercase text-[#C8102E]">
-                  2022
-                </div>
-              </div>
+              ) : (
+                <img
+                  src={featured.posterUrl}
+                  alt={featured.title}
+                  className="w-40 h-60 sm:w-64 sm:h-96 rounded-2xl object-cover shadow-2xl shadow-[0_20px_60px_rgba(200,16,46,0.25),0_4px_24px_rgba(0,0,0,0.15)]"
+                />
+              )}
             </div>
           </div>
 
           <div className="w-full h-48 sm:h-56">
             <ScrollRow>
-              {movies.map((movie) => (
-                <MovieCard
-                  key={movie.id}
-                  movie={movie}
-                  isActive={activeMovieId === movie.id}
-                  onClick={() => setActiveMovieId(movie.id)}
-                />
-              ))}
+              {rowLoading
+                ? Array.from({ length: 10 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-[160px] h-[240px] bg-gray-200 rounded-lg animate-pulse flex-shrink-0"
+                    />
+                  ))
+                : movies.map((movie) => (
+                    <MovieCard
+                      key={movie.id}
+                      movie={movie}
+                      isActive={activeMovieId === movie.id}
+                      onClick={() => setActiveMovieId(movie.id)}
+                    />
+                  ))}
             </ScrollRow>
           </div>
         </div>

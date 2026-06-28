@@ -40,3 +40,59 @@ export function getPopularMovies(page = 1) {
 export function getNowPlayingMovies(page = 1) {
   return tmdbFetch(`/movie/now_playing`, { page });
 }
+export function discoverMovies({
+  page = 1,
+  sortBy = "popularity.desc",
+  genreId = null,
+  yearGte = null,
+  yearLte = null,
+  certification = null,
+} = {}) {
+  const params = {
+    page,
+    sort_by: sortBy,
+    include_adult: false,
+  };
+  if (genreId) params.with_genres = genreId;
+  if (yearGte) params["primary_release_date.gte"] = `${yearGte}-01-01`;
+  if (yearLte) params["primary_release_date.lte"] = `${yearLte}-12-31`;
+  if (certification) {
+    params.certification_country = "US";
+    params.certification = certification;
+  }
+  return tmdbFetch(`/discover/movie`, params);
+}
+
+export function discoverTV({
+  page = 1,
+  sortBy = "popularity.desc",
+  genreId = null,
+  yearGte = null,
+  yearLte = null,
+} = {}) {
+  const params = {
+    page,
+    sort_by: sortBy,
+    include_adult: false,
+  };
+  if (genreId) params.with_genres = genreId;
+  if (yearGte) params["first_air_date.gte"] = `${yearGte}-01-01`;
+  if (yearLte) params["first_air_date.lte"] = `${yearLte}-12-31`;
+  // Note: TV certifications use a different scheme (TV ratings, not MPAA);
+  // not wired here — see flag below.
+  return tmdbFetch(`/discover/tv`, params);
+}
+
+export function getMovieGenres() {
+  return tmdbFetch(`/genre/movie/list`);
+}
+
+export function getTVGenres() {
+  return tmdbFetch(`/genre/tv/list`);
+}
+export function getTVDetails(id) {
+  return tmdbFetch(`/tv/${id}`, { append_to_response: "credits,videos" });
+}
+export function getCollectionDetails(id) {
+  return tmdbFetch(`/collection/${id}`);
+}

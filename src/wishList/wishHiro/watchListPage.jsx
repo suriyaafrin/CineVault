@@ -1,7 +1,12 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { FaSearch, FaPlus } from "react-icons/fa";
 import { useWatchlistStore } from "./useWatchlistStore";
 import WatchlistCard from "./watchListCard";
+import MovieDetailModal from "../../component/top-Banner/newReleaseSec/movieDetailModal";
+import { formatDuration } from "../../utils/formateDuration";
+// NOTE: both import paths above are guessed based on the depth used
+// elsewhere in the project (this file lives in src/wishList/wishHiro/ per
+// earlier confirmation). Double-check before running.
 
 const TABS = [
   { key: "all", label: "All Content" },
@@ -23,6 +28,8 @@ export default function WatchlistPage() {
   const setSortBy = useWatchlistStore((state) => state.setSortBy);
   const searchQuery = useWatchlistStore((state) => state.searchQuery);
   const setSearchQuery = useWatchlistStore((state) => state.setSearchQuery);
+
+  const [activeItem, setActiveItem] = useState(null);
 
   const visibleItems = useMemo(() => {
     let result = items;
@@ -48,6 +55,20 @@ export default function WatchlistPage() {
     return result;
   }, [items, activeTab, searchQuery, sortBy]);
 
+  // MovieDetailModal expects `posterUrl` and `releaseDate`, but watchlist
+  // items are stored as `poster` and `year` (see handleToggleWatchlist in
+  // MovieDetailModal — that's the shape toggleItem actually saves). This
+  // adapter maps the stored shape back to what the modal reads, rather than
+  // changing the storage shape itself, since other watchlist UI (cards,
+  // sort-by-year) already depends on `year`/`poster` directly.
+  const handleOpen = (item) => {
+    setActiveItem({
+      ...item,
+      posterUrl: item.poster,
+      releaseDate: item.year ? String(item.year) : null,
+    });
+  };
+
   return (
     <section className="relative bg-white">
       {/* Background banner */}
@@ -58,11 +79,7 @@ export default function WatchlistPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#C8102E]">
             My Watchlist
-          </h1>
-          <button className="flex items-center justify-center gap-2 bg-[#C8102E] hover:bg-[#A50D26] text-white text-sm font-medium px-4 py-2.5 rounded-md transition-colors self-start sm:self-auto whitespace-nowrap">
-            <FaPlus className="w-3 h-3" />
-            Add New Titles
-          </button>
+          </h1>      
         </div>
 
         {/* Tabs + Sort row */}
@@ -115,7 +132,7 @@ export default function WatchlistPage() {
         {visibleItems.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 sm:gap-4">
             {visibleItems.map((item) => (
-              <WatchlistCard key={item.id} item={item} />
+              <WatchlistCard key={item.id} item={item} onOpen={handleOpen} />
             ))}
           </div>
         ) : (
@@ -124,6 +141,15 @@ export default function WatchlistPage() {
           </div>
         )}
       </div>
+
+      {activeItem && (
+        <MovieDetailModal
+          movie={activeItem}
+          type={activeItem.type}
+          formatDuration={formatDuration}
+          onClose={() => setActiveItem(null)}
+        />
+      )}
     </section>
   );
 }

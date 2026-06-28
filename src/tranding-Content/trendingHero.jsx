@@ -1,23 +1,62 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { FaPlay, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { trendingHeroItems } from "../../data/trendingData/trendingData";
-
-
+// import { fetchTrending, getImageUrl } from "../services/tmdb";
 import MovieDetailModal from "../component/top-Banner/newReleaseSec/movieDetailModal";
+import { formatDuration } from "../utils/formateDuration";
+import { fetchTrending, getImageUrl } from "../services/tmdb"
 
 const AUTO_ADVANCE_MS = 5000;
 
 const TrendingHero = () => {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [activeItemId, setActiveItemId] = useState(null);
   const trackRef = useRef(null);
-  const total = trendingHeroItems.length;
+  const total = items.length;
 
-  const activeItem = trendingHeroItems.find((item) => item.id === activeItemId);
+  const activeItem = items.find((item) => item.id === activeItemId);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadTrending() {
+      try {
+        const data = await fetchTrending("all", "week");
+        if (!isMounted) return;
+
+        const mapped = (data.results || [])
+          .filter((item) => item.media_type === "movie" || item.media_type === "tv")
+          .map((item) => ({
+            id: item.id,
+            mediaType: item.media_type,
+            title: item.title || item.name,
+            backdrop: getImageUrl(item.backdrop_path, "w1280"),
+            posterUrl: getImageUrl(item.poster_path),
+            overview: item.overview,
+            releaseDate: item.release_date || item.first_air_date,
+            rating: item.vote_average,
+            type: item.media_type === "tv" ? "Series" : "Movie",
+          }));
+
+        setItems(mapped);
+      } catch (err) {
+        console.error("Failed to fetch trending hero items:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    loadTrending();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const goTo = useCallback(
     (index) => {
+      if (total === 0) return;
       setActiveIndex(((index % total) + total) % total);
     },
     [total],
@@ -27,14 +66,24 @@ const TrendingHero = () => {
   const goPrev = useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
 
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || total === 0) return;
 
     const timer = setInterval(() => {
       goNext();
     }, AUTO_ADVANCE_MS);
 
     return () => clearInterval(timer);
-  }, [isPaused, goNext]);
+  }, [isPaused, goNext, total]);
+
+  if (loading) {
+    return (
+      <section className="relative max-w-6xl mx-auto overflow-hidden rounded-xl aspect-video sm:aspect-16/7 lg:aspect-16/5 bg-gray-200 animate-pulse" />
+    );
+  }
+
+  if (items.length === 0) {
+    return null;
+  }
 
   return (
     <section
@@ -47,7 +96,7 @@ const TrendingHero = () => {
         className="flex transition-transform duration-500 ease-out"
         style={{ transform: `translateX(-${activeIndex * 100}%)` }}
       >
-        {trendingHeroItems.map((item) => (
+        {items.map((item) => (
           <div
             key={item.id}
             className="relative w-full shrink-0 aspect-video sm:aspect-16/7 lg:aspect-16/5 cursor-pointer"
@@ -85,8 +134,7 @@ const TrendingHero = () => {
                 {item.title}
               </h2>
               <p className="mt-1 text-xs text-white/70 sm:text-sm">
-                {item.year} &middot; {item.runtime} &middot;{" "}
-                {item.genres.join(", ")}
+                {item.releaseDate ? item.releaseDate.slice(0, 4) : ""}
               </p>
             </div>
           </div>
@@ -111,7 +159,7 @@ const TrendingHero = () => {
       </button>
 
       <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5">
-        {trendingHeroItems.map((item, index) => (
+        {items.map((item, index) => (
           <button
             key={item.id}
             type="button"
@@ -128,9 +176,10 @@ const TrendingHero = () => {
 
       {activeItem && (
         <MovieDetailModal
-          movie={{ ...activeItem, posterUrl: activeItem.backdrop, genre: activeItem.genres?.join(", ") }}
+          movie={activeItem}
           onClose={() => setActiveItemId(null)}
-         
+          formatDuration={formatDuration}
+          type={activeItem.mediaType === "tv" ? "series" : "movie"}
         />
       )}
     </section>

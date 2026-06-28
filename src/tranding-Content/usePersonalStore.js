@@ -1,69 +1,97 @@
 import { create } from "zustand";
+import {
+  getTopRatedMovies,
+  getTopRatedTV,
+  getMovieDetails,
+  getTVDetails,
+  getImageUrl,
+} from "../services/tmdb";
+// NOTE: import path depth guessed to match the established 3-levels-under-src
+// convention used elsewhere in the project. Verify against this file's
+// actual location before running.
 
-// Mirrors useGlobalStore / useCommunityStore shape.
-// In a real app, swap personalItems for a personalized API
-// call keyed off the logged-in user's watch history.
-export const personalItems = [
-  {
-    id: 1,
-    rank: 1,
-    title: "Barbie",
-    subtitle: "Viral soundtrack",
-    image:
-      "https://images.unsplash.com/photo-1530268729831-4b0b9e170218?w=300",
-    detail:
-      "You watched Barbie last week — its soundtrack is now the most shared audio clip on CineVault Socii. Revisit your favorite scenes or jump into the fan remix thread.",
-    reason: "Because you watched Barbie",
-  },
-  {
-    id: 2,
-    rank: 2,
-    title: "The Bear S3",
-    subtitle: "Teaser drop",
-    image:
-      "https://images.unsplash.com/photo-1495195134817-aeb325a55b65?w=300",
-    detail:
-      "The Bear Season 3 teaser just dropped and matches your taste for tense, character-driven drama. Watch the teaser now before the full season lands.",
-    reason: "Based on your watch history",
-  },
-  {
-    id: 3,
-    rank: 3,
-    title: "The Dark Knight",
-    subtitle: "",
-    image:
-      "https://images.unsplash.com/photo-1531259683007-016fe864c333?w=300",
-    detail:
-      "A perennial favorite among viewers who enjoyed The Batman. Still one of the highest-rated entries in the genre on CineVault.",
-    reason: "Similar to titles you've rated highly",
-  },
-  {
-    id: 4,
-    rank: 4,
-    title: "Oppenheimer",
-    subtitle: "",
-    image:
-      "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=300",
-    detail:
-      "Still trending across your region this week. Pick up where you left off or start a rewatch with commentary mode.",
-    reason: "Trending in your region",
-  },
-  {
-    id: 5,
-    rank: 5,
-    title: "The Last of Us S2",
-    subtitle: "",
-    image:
-      "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=300",
-    detail:
-      "New episodes are climbing the charts fast. Based on your watch history, this is a strong match for your taste in tense, story-driven series.",
-    reason: "Because you watched similar series",
-  },
-];
+// There's no real "personalized to this user" endpoint available (no watch
+// history / auth-scoped recommendation API wired up), so this uses top-rated
+// movies + TV as an honest stand-in for "Recommended for you" rather than
+// pretending to be personalized. Swap this for a real recommendations
+// endpoint later if/when user watch history is tracked server-side.
+function mapPersonalItem(raw, isMovie, rank) {
+  const title = isMovie ? raw.title : raw.name;
+  return {
+    id: raw.id,
+    rank,
+    title,
+    type: isMovie ? "movie" : "series",
+    subtitle: raw.vote_average ? `★ ${raw.vote_average.toFixed(1)}` : "",
+    image: getImageUrl(raw.poster_path),
+    posterUrl: getImageUrl(raw.poster_path),
+    overview: raw.overview || null,
+    rating: raw.vote_average,
+    releaseDate: isMovie ? raw.release_date : raw.first_air_date,
+  };
+}
 
-export const usePersonalStore = create((set) => ({
-  personalItems,
+export const usePersonalStore = create((set, get) => ({
+  // ---- state ----
+  personalItems: [],
   activePersonalId: null,
-  openPersonalModal: (id) => set({ activePersonalId: id }),
-  closePersonalModal: () => set({ activePersonalId: null }),
+  isLoading: false,
+  error: null,
+
+  // Detail cache for the active item — holds trailer/genre/runtime info
+  // fetched lazily when a modal opens, same pattern as MovieDetailModal.
+  activeDetails: null,
+  isLoadingDetails: false,
+
+  // ---- actions ----
+  fetchPersonalItems: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const [movies, tv] = await Promise.all([
+        getTopRatedMovies(),
+        getTopRatedTV(),
+      ]);
+
+      const mappedMovies = (movies.results || [])
+        .slice(0, 3)
+        .map((r) => mapPersonalItem(r, true));
+      const mappedTV = (tv.results || [])
+        .slice(0, 2)
+        .map((r) => mapPersonalItem(r, false));
+
+      const merged = [...mappedMovies, ...mappedTV].map((item, i) => ({
+        ...item,
+        rank: i + 1,
+      }));
+
+      set({ personalItems: merged, isLoading: false });
+    } catch (err) {
+      console.error("Failed to fetch personal trending items:", err);
+      set({ error: err.message, isLoading: false });
+    }
+  },
+
+  openPersonalModal: async (id) => {
+    set({ activePersonalId: id, activeDetails: null, isLoadingDetails: true });
+
+    const item = get().personalItems.find((i) => i.id === id);
+    if (!item) {
+      set({ isLoadingDetails: false });
+      return;
+    }
+
+    try {
+      const data =
+        item.type === "series"
+          ? await getTVDetails(item.id)
+          : await getMovieDetails(item.id);
+      set({ activeDetails: data, isLoadingDetails: false });
+    } catch (err) {
+      console.error("Failed to load personal item details:", err);
+      set({ isLoadingDetails: false });
+    }
+  },
+
+  closePersonalModal: () =>
+    set({ activePersonalId: null, activeDetails: null }),
 }));

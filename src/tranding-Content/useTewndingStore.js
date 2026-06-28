@@ -1,92 +1,118 @@
 import { create } from "zustand";
+import {
+  fetchTrending,
+  getMovieGenres,
+  getTVGenres,
+  getImageUrl,
+} from "../services/tmdb";
+// NOTE: import path depth guessed to match the established 3-levels-under-src
+// convention from past sessions. Double-check against this file's actual
+// folder location before running.
 
-export const useTrendingStore = create((set) => ({
+const CURRENT_YEAR = new Date().getFullYear();
+
+function mapTrendingItem(raw, genreMap) {
+  const isMovie = raw.media_type === "movie";
+  const title = isMovie ? raw.title : raw.name;
+  const dateStr = isMovie ? raw.release_date : raw.first_air_date;
+  const year = dateStr ? Number(dateStr.slice(0, 4)) : null;
+  const posterUrl = getImageUrl(raw.poster_path);
+
+  const genreNames = (raw.genre_ids || [])
+    .map((id) => genreMap[id])
+    .filter(Boolean);
+
+  // slug mirrors the title+id convention used elsewhere in the project
+  // (see slugify.js) so items opened from Trending behave the same way
+  // in the watchlist as items opened from other sections.
+  const slug =
+    `${title}`
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "") + `-${raw.id}`;
+
+  return {
+    id: raw.id,
+    title,
+    slug,
+    type: isMovie ? "movie" : "series",
+    year,
+    // MovieDetailModal reads movie.releaseDate directly (not year),
+    // so the raw date string needs to be carried through too.
+    releaseDate: dateStr || null,
+    rating: raw.vote_average,
+    overview: raw.overview || null,
+    posterUrl,
+    genres: genreNames,
+    isNew: year === CURRENT_YEAR,
+    badge: "Trending this week",
+  };
+}
+
+export const useTrendingStore = create((set, get) => ({
   // ---- state ----
   activeCategory: "all",
-
-  items: [
-    {
-      id: "oppenheimer",
-      title: "Oppenheimer",
-      type: "movie",
-      year: 2023,
-      duration: "3h 0m",
-      views: "1.19K views",
-      rating: 8.8,
-      badge: "Trending due to high buzz",
-      poster:
-        "https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=400&q=80",
-    },
-    {
-      id: "the-last-of-us-s2",
-      title: "The Last of Us S2",
-      type: "series",
-      year: 2023,
-      duration: "1 Season",
-      views: "1.73K views",
-      rating: 9.3,
-      badge: "Trending due to high buzz",
-      poster:
-        "https://images.unsplash.com/photo-1603190287605-e6ade32fa852?w=400&q=80",
-    },
-    {
-      id: "spider-man-4",
-      title: "Spider-Man 4",
-      type: "movie",
-      year: 2024,
-      duration: "2h 20m",
-      views: "1.17K views",
-      rating: 8.8,
-      badge: "Trending due to high buzz",
-      poster:
-        "https://images.unsplash.com/photo-1635805737707-575885ab0820?w=400&q=80",
-    },
-    {
-      id: "spider-man-4-conceptual",
-      title: '"Spider-Man 4"',
-      type: "movie",
-      year: 2024,
-      duration: "(Conceptual)",
-      views: "1.17K views",
-      rating: 8.7,
-      badge: "Trending due to high buzz",
-      poster:
-        "https://images.unsplash.com/photo-1626814026160-2237a95fc5c0?w=400&q=80",
-    },
-    {
-      id: "barbie",
-      title: "Barbie",
-      type: "movie",
-      year: 2023,
-      duration: "2h 2hm",
-      views: "1.22K views",
-      rating: 8.6,
-      badge: "Trending due to high buzz",
-      poster:
-        "https://images.unsplash.com/photo-1593085260707-5377ba37f868?w=400&q=80",
-    },
-    {
-      id: "stranger-things-finale",
-      title: "Stranger Things Finale",
-      type: "series",
-      year: 2023,
-      duration: "4 Seasons",
-      views: "1.57K views",
-      rating: 8.7,
-      badge: "Trending due to high buzz",
-      poster:
-        "https://images.unsplash.com/photo-1626814026160-2237a95fc5c0?w=400&q=80",
-    },
-  ],
+  items: [],
+  genreMap: {},
+  isLoading: false,
+  error: null,
 
   // ---- actions ----
   setActiveCategory: (category) => set({ activeCategory: category }),
 
-  // NOTE: filtering is intentionally NOT done here anymore.
+  fetchGenreMap: async () => {
+    // Skip refetch if already populated.
+    if (Object.keys(get().genreMap).length > 0) return get().genreMap;
+
+    try {
+      const [movieGenres, tvGenres] = await Promise.all([
+        getMovieGenres(),
+        getTVGenres(),
+      ]);
+
+      const map = {};
+      // Movie and TV genre id spaces overlap but aren't identical
+      // (e.g. some ids only exist on one side). Merging both into a
+      // single map is fine here since each item only looks up the ids
+      // relevant to its own media_type, but if a movie and a TV genre
+      // ever share an id with different names, the later merge wins.
+      [...(movieGenres.genres || []), ...(tvGenres.genres || [])].forEach(
+        (g) => {
+          map[g.id] = g.name;
+        }
+      );
+
+      set({ genreMap: map });
+      return map;
+    } catch (err) {
+      console.error("Failed to load genre lists:", err);
+      return {};
+    }
+  },
+
+  fetchTrendingItems: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const genreMap = await get().fetchGenreMap();
+      const data = await fetchTrending("all", "week");
+      const mapped = (data.results || [])
+        // trending/all can include "person" results — filter those out,
+        // this row only renders movies/series.
+        .filter((r) => r.media_type === "movie" || r.media_type === "tv")
+        .map((raw) => mapTrendingItem(raw, genreMap));
+
+      set({ items: mapped, isLoading: false });
+    } catch (err) {
+      console.error("Failed to fetch trending items:", err);
+      set({ error: err.message, isLoading: false });
+    }
+  },
+
+  // NOTE: filtering is intentionally NOT done here.
   // A method that returns `items.filter(...)` creates a brand-new array
   // reference on every call. When used inside a Zustand selector
   // (e.g. `useTrendingStore((state) => state.getFilteredItems())`),
   // that new reference looks like a "state change" every render,
   // which triggers another render, which calls it again — infinite loop.
-  // Filtering now happens in the component via useMemo instead.
+  // Filtering happens in the component via useMemo instead.
 }));

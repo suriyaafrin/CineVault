@@ -1,55 +1,90 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaBookmark, FaPlay, FaTimes } from "react-icons/fa";
-// import { getMovieDetails } from "../../../../services/tmdb";
-import { getMovieDetails } from "../../../services/tmdb"
+import { getMovieDetails, getTVDetails } from "../../../services/tmdb";
+import { useWatchlistStore } from "../../../wishList/wishHiro/useWatchlistStore"
 
-const MovieDetailModal = ({ movie, onClose, formatDuration }) => {
+const MovieDetailModal = ({ movie, onClose, formatDuration, type = "movie" }) => {
   const [details, setDetails] = useState(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(true);
- 
+
+  // FIX: select the reactive `items` array itself, not the `isInWatchlist`
+  // function. Zustand only re-renders when the *selected value* changes
+  // between renders -- selecting a stable function reference (which never
+  // changes) means React never re-renders this component when items
+  // changes, even though the underlying state is updating correctly.
+  const items = useWatchlistStore((state) => state.items);
+  const toggleItem = useWatchlistStore((state) => state.toggleItem);
+
   useEffect(() => {
     let cancelled = false;
- 
+
     async function loadDetails() {
       setIsLoadingDetails(true);
       try {
-        const data = await getMovieDetails(movie.id);
+        const data =
+          type === "series"
+            ? await getTVDetails(movie.id)
+            : await getMovieDetails(movie.id);
         if (!cancelled) setDetails(data);
       } catch (err) {
-        console.error("Failed to load movie details:", err);
+        console.error("Failed to load details:", err);
       } finally {
         if (!cancelled) setIsLoadingDetails(false);
       }
     }
- 
+
     loadDetails();
     return () => {
       cancelled = true;
     };
-  }, [movie.id]);
- 
+  }, [movie.id, type]);
+
   const year = movie.releaseDate ? movie.releaseDate.slice(0, 4) : null;
   const genreNames = details?.genres?.map((g) => g.name).join(", ") || null;
-  const runtime = details?.runtime || null;
- 
+  // Movies expose runtime directly; TV exposes episode_run_time as an array
+  const runtime =
+    type === "series"
+      ? details?.episode_run_time?.[0] || null
+      : details?.runtime || null;
+
   const trailer = details?.videos?.results?.find(
     (v) => v.site === "YouTube" && v.type === "Trailer"
   ) || details?.videos?.results?.find((v) => v.site === "YouTube");
- 
+
   const handleWatchNow = () => {
     if (trailer) {
       window.open(`https://www.youtube.com/watch?v=${trailer.key}`, "_blank", "noopener,noreferrer");
     }
   };
- 
+
+  const watchlistId = String(movie.id);
+  // FIX: derive `saved` from the reactive `items` array (selected above),
+  // not from calling the store's isInWatchlist() helper directly. This
+  // recomputes correctly on every render because `items` is now the thing
+  // React is actually watching.
+  const saved = items.some((i) => i.id === watchlistId);
+
+  const handleToggleWatchlist = () => {
+    toggleItem({
+      id: watchlistId,
+      slug: movie.slug,
+      title: movie.title,
+      type,
+      year: year ? Number(year) : null,
+      runtime: runtime ? formatDuration(runtime) : null,
+      rating: movie.rating,
+      poster: movie.posterUrl,
+    });
+  };
+
   return createPortal(
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-60 p-6"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bg-white rounded-xl border border-black/10 w-full max-w-md overflow-hidden shadow-2xl">
- 
+
         <div className="relative h-44">
           {movie.posterUrl ? (
             <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover opacity-70" />
@@ -66,7 +101,7 @@ const MovieDetailModal = ({ movie, onClose, formatDuration }) => {
           >
             <FaTimes size={13} />
           </button>
- 
+
           <div className="absolute left-4 -bottom-7 w-16 h-24 rounded-lg overflow-hidden border-2 border-white bg-black/5 flex items-center justify-center shadow-md">
             {movie.posterUrl ? (
               <img src={movie.posterUrl} alt="" className="w-full h-full object-cover" />
@@ -75,11 +110,11 @@ const MovieDetailModal = ({ movie, onClose, formatDuration }) => {
             )}
           </div>
         </div>
- 
+
         <div className="pt-2 pb-4 px-4 pl-24">
           <h3 className="text-black text-base font-semibold leading-tight">{movie.title}</h3>
           {year && <p className="text-black/40 text-xs mt-0.5">{year}</p>}
- 
+
           {isLoadingDetails ? (
             <span className="inline-block mt-1.5 bg-black/5 text-black/40 text-[10px] px-2 py-0.5 rounded">
               Loading...
@@ -91,7 +126,7 @@ const MovieDetailModal = ({ movie, onClose, formatDuration }) => {
               </span>
             )
           )}
- 
+
           <div className="flex gap-4 mt-3">
             {movie.rating && (
               <div>
@@ -107,13 +142,13 @@ const MovieDetailModal = ({ movie, onClose, formatDuration }) => {
             )}
           </div>
         </div>
- 
+
         {movie.overview && (
           <div className="px-4 pb-4">
             <p className="text-black/60 text-xs leading-relaxed border-t border-black/[0.07] pt-3">{movie.overview}</p>
           </div>
         )}
- 
+
         <div className="flex gap-2 px-4 py-3 border-t border-black/[0.07]">
           <button
             onClick={handleWatchNow}
@@ -123,7 +158,14 @@ const MovieDetailModal = ({ movie, onClose, formatDuration }) => {
             <FaPlay size={11} />
             {isLoadingDetails ? "Loading..." : trailer ? "Watch now" : "No trailer available"}
           </button>
-          <button className="w-9 h-9 flex items-center justify-center bg-black/4 hover:bg-black/10 border border-black/10 text-black/70 rounded-lg transition-colors">
+          <button
+            onClick={handleToggleWatchlist}
+            className={`w-9 h-9 flex items-center justify-center border rounded-lg transition-colors ${
+              saved
+                ? "bg-[#C8102E] border-[#C8102E] text-white"
+                : "bg-black/4 hover:bg-black/10 border-black/10 text-black/70"
+            }`}
+          >
             <FaBookmark size={14} />
           </button>
         </div>
@@ -132,6 +174,5 @@ const MovieDetailModal = ({ movie, onClose, formatDuration }) => {
     document.body
   );
 };
- 
+
 export default MovieDetailModal;
- 
