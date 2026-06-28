@@ -1,15 +1,14 @@
-import useTop10Store from "./useTop10Store";
+import { useTop10Store } from "./useTop10Store";
 
-const Top10Card = ({ movie }) => {
+const Top10Card = ({ movie, rank }) => {
   const { activeId, setActiveId } = useTop10Store();
   const isActive = activeId === movie.id;
-  const rank = String(movie.id).padStart(2, "0");
+  const displayRank = String(rank).padStart(2, "0");
 
   return (
     <div
       className="flex items-end cursor-pointer group"
       onClick={() => {
-        console.log("Card clicked, setting id:", movie.id);
         setActiveId(isActive ? null : movie.id);
       }}
     >
@@ -21,7 +20,7 @@ const Top10Card = ({ movie }) => {
           transition: "all 0.2s",
         }}
       >
-        {rank}
+        {displayRank}
       </span>
 
       <div
@@ -32,7 +31,7 @@ const Top10Card = ({ movie }) => {
         }`}
       >
         <img
-          src={movie.poster}
+          src={movie.posterUrl}
           alt={movie.title}
           className="w-full h-full object-cover"
         />

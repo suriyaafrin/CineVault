@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { newReleasesData } from "../../../../data/newReleaseData/data";
+import { useState, useEffect } from "react";
+import { getNowPlayingMovies, getImageUrl } from "../../../services/tmdb"
 import MovieCard from "../MovieCard";
 import { ScrollRow } from "../scrollRow";
 import AllNewReleasesModal from "./allNewReleasesModal";
@@ -13,6 +13,40 @@ const formatDuration = (mins) => {
 const NewReleasesSection = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadNowPlaying() {
+      try {
+        const data = await getNowPlayingMovies();
+        if (!isMounted) return;
+
+        const mapped = data.results.map((movie) => ({
+          id: movie.id,
+          title: movie.title,
+          posterUrl: getImageUrl(movie.poster_path),
+          overview: movie.overview,
+          releaseDate: movie.release_date,
+          rating: movie.vote_average,
+          genre_ids: movie.genre_ids,
+        }));
+
+        setMovies(mapped);
+      } catch (err) {
+        console.error("Failed to fetch now playing movies:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    loadNowPlaying();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <>
@@ -27,14 +61,22 @@ const NewReleasesSection = () => {
             <span className="text-base leading-none">›</span>
           </button>
         </div>
+
         <ScrollRow>
-          {newReleasesData.map((movie) => (
-            <MovieCard
-              key={movie.id}
-              movie={movie}
-              onClick={() => setSelectedMovie(movie)}
-            />
-          ))}
+          {loading
+            ? Array.from({ length: 7 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="w-[160px] h-[240px] bg-white/10 rounded-lg animate-pulse flex-shrink-0"
+                />
+              ))
+            : movies.map((movie) => (
+                <MovieCard
+                  key={movie.id}
+                  movie={movie}
+                  onClick={() => setSelectedMovie(movie)}
+                />
+              ))}
         </ScrollRow>
 
         {selectedMovie && (
@@ -49,7 +91,7 @@ const NewReleasesSection = () => {
       <AllNewReleasesModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        movies={newReleasesData}
+        movies={movies}
       />
     </>
   );

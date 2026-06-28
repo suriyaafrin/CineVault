@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useState } from "react";
 import { MdChevronRight } from "react-icons/md";
 
@@ -5,15 +6,39 @@ import Top10Card from "./top10Card";
 import Top10Modal from "./top10Modal";
 import useTop10Store from "./useTop10Store";
 
-import { top10Movies } from "../../../../data/top10Data/top10Data";
-
 import MovieDetailModal from "../newReleaseSec/movieDetailModal";
 import { formatDuration } from "../../../utils/formateDuration";
 
 const Top10Section = () => {
   const [modalOpen, setModalOpen] = useState(false);
-  const { activeId, setActiveId } = useTop10Store();
-  const activeMovie = top10Movies.find((movie) => movie.id === activeId);
+  const { items, isLoading, error, activeId, setActiveId, fetchTop10 } =
+    useTop10Store();
+
+  useEffect(() => {
+    fetchTop10();
+  }, [fetchTop10]);
+
+  const activeMovie = items.find((movie) => movie.id === activeId);
+
+  if (isLoading) {
+    return (
+      <section className="w-full py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <p className="text-[#111]">Loading top 10...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="w-full py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <p className="text-[#C8102E]">Failed to load: {error}</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full py-6">
@@ -31,8 +56,8 @@ const Top10Section = () => {
         </div>
 
         <div className="grid grid-cols-5 gap-3 lg:gap-6">
-          {top10Movies.slice(0, 5).map((movie) => (
-            <Top10Card key={movie.id} movie={movie} />
+          {items.slice(0, 5).map((movie, index) => (
+            <Top10Card key={movie.id} movie={movie} rank={index + 1} />
           ))}
         </div>
       </div>

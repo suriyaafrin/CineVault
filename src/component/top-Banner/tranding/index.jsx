@@ -1,27 +1,57 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaChevronRight } from "react-icons/fa";
 
 import MovieCard from "../MovieCard";
-import { ScrollRow } from "../scrollRow";
-
-
 import MovieDetailModal from "../newReleaseSec/movieDetailModal";
+import { formatDuration } from "../../../utils/formateDuration";
+import { fetchTrending, getImageUrl } from "../../../services/tmdb";
 
-
-const mockMovies = [
-  { id: 1, title: "Oppenheimer", year: 2023, genre: "Drama", rating: 8.8, badge: "MOVIE", poster: "https://image.tmdb.org/t/p/w300/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg" },
-  { id: 2, title: "Stranger Things", year: 2016, genre: "Sci-Fi", rating: 8.7, badge: "SERIES", poster: "https://image.tmdb.org/t/p/w300/49WJfeN0moxb9IPfGn8AIqMGskD.jpg" },
-  { id: 3, title: "Inception", year: 2010, genre: "Thriller", rating: 8.8, badge: "New", poster: "https://image.tmdb.org/t/p/w300/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg" },
-  { id: 4, title: "The Last of Us", year: 2023, genre: "Action", rating: 9.3, badge: "SERIES", poster: "https://image.tmdb.org/t/p/w300/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg" },
-  { id: 5, title: "Interstellar", year: 2014, genre: "Sci-Fi", rating: 8.6, badge: "MOVIE", poster: "https://image.tmdb.org/t/p/w300/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" },
-  { id: 6, title: "The Dark Knight", year: 2008, genre: "Action", rating: 9.0, badge: "MOVIE", poster: "https://image.tmdb.org/t/p/w300/qJ2tW6WMUDux911r6m7haRef0WH.jpg" },
-  { id: 7, title: "Breaking Bad", year: 2008, genre: "Crime", rating: 9.5, badge: "SERIES", poster: "https://image.tmdb.org/t/p/w300/ggFHVNu6YYI5L9pCfOacjizRGt.jpg" },
-];
-
-export default function TrendingSection({ movies = mockMovies }) {
+export default function TrendingSection() {
+  const [movies, setMovies] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeId, setActiveId] = useState(null);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadTrending() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await fetchTrending("movie", "week");
+        if (cancelled) return;
+        const mapped = data.results.map((movie) => ({
+          id: movie.id,
+          title: movie.title,
+          posterUrl: getImageUrl(movie.poster_path),
+          backdropUrl: getImageUrl(movie.backdrop_path, "original"),
+          overview: movie.overview,
+          rating: movie.vote_average ? movie.vote_average.toFixed(1) : null,
+          releaseDate: movie.release_date,
+          year: movie.release_date ? movie.release_date.slice(0, 4) : "",
+        }));
+        setMovies(mapped);
+      } catch (err) {
+        if (!cancelled) setError(err.message);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    loadTrending();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const activeMovie = movies.find((movie) => movie.id === activeId);
+
+  const scroll = (dir) => {
+    scrollRef.current?.scrollBy({ left: dir * 240, behavior: "smooth" });
+  };
 
   return (
     <section className="py-6 w-full relative">
@@ -36,23 +66,59 @@ export default function TrendingSection({ movies = mockMovies }) {
           </Link>
         </div>
 
-        <ScrollRow>
-          {movies.map((movie) => (
-            <MovieCard
-              key={movie.id}
-              movie={movie}
-              isActive={activeId === movie.id}
-              onClick={() => setActiveId(movie.id)}
-            />
-          ))}
-        </ScrollRow>
+        {isLoading && (
+          <div className="flex gap-4 overflow-hidden">
+            {Array.from({ length: 7 }).map((_, i) => (
+              <div key={i} className="shrink-0 w-27 animate-pulse">
+                <div className="w-27 h-38 rounded-xl bg-gray-200" />
+                <div className="mt-1.5 h-2.5 w-20 rounded bg-gray-200" />
+                <div className="mt-1 h-2 w-14 rounded bg-gray-200" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {error && <p className="text-[#C8102E] text-sm">Failed to load: {error}</p>}
+
+        {!isLoading && !error && (
+          <div className="relative group/row">
+            <button
+              onClick={() => scroll(-1)}
+              className="absolute -left-4 top-1/3 -translate-y-1/2 z-10 bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity shadow-md"
+            >
+              ‹
+            </button>
+
+            <div
+              ref={scrollRef}
+              className="flex gap-4 overflow-x-auto pb-2 scroll-smooth"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {movies.map((movie) => (
+                <MovieCard
+                  key={movie.id}
+                  movie={movie}
+                  isActive={activeId === movie.id}
+                  onClick={() => setActiveId(movie.id)}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={() => scroll(1)}
+              className="absolute -right-4 top-1/3 -translate-y-1/2 z-10 bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 rounded-full w-8 h-8 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity shadow-md"
+            >
+              ›
+            </button>
+          </div>
+        )}
       </div>
 
       {activeMovie && (
         <MovieDetailModal
           movie={activeMovie}
           onClose={() => setActiveId(null)}
-          
+          formatDuration={formatDuration}
         />
       )}
     </section>

@@ -117,10 +117,10 @@ export default function ContinueWatchingModal({ onClose, onSelectMovie }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 pt-5">
-          <h2 className="text-lg font-bold text-gray-900">Continue Watching</h2>
+          <h2 className="text-lg font-bold text-[#C8102E]">Continue Watching</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-800 transition-colors"
+            className="text-gray-500 hover:text-[#C8102E] transition-colors"
             title="Close"
           >
             <MdClose className="w-5 h-5" />

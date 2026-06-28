@@ -1,48 +1,47 @@
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
 import { FaChevronRight } from "react-icons/fa";
 import WatchCard from "./watchCard";
 import ContinueWatchingModal from "./ContinueWatchingModal";
 import MovieDetailModal from "../newReleaseSec/movieDetailModal";
 import { formatDuration } from "../../../utils/formateDuration";
+import { getPopularMovies, getImageUrl } from "../../../services/tmdb";
+
+// Fake progress data to simulate watch history, cycled across fetched movies
+const FAKE_PROGRESS = [
+  { progress: 62, timeLeft: "1h 12m", totalTime: "2h 56m" },
+  { progress: 33, episodesLeft: "3 Episodes left" },
+  { progress: 75, episodesLeft: "2 Episodes left" },
+  { progress: 88, timeLeft: "19m", totalTime: "2h 28m" },
+  { progress: 45, timeLeft: "55m", totalTime: "1h 40m" },
+  { progress: 20, episodesLeft: "5 Episodes left" },
+];
 
 export const useWatchStore = create((set) => ({
-  items: [
-    {
-      id: 1,
-      title: "The Batman",
-      thumbnail:
-        "https://images.unsplash.com/photo-1635805737707-575885ab0820?w=400&q=80",
-      progress: 62,
-      timeLeft: "1h 12m",
-      totalTime: "2h 56m",
-    },
-    {
-      id: 2,
-      title: "Stranger Things S4",
-      thumbnail:
-        "https://images.unsplash.com/photo-1604975999044-188783d54fb3?w=400&q=80",
-      progress: 33,
-      episodesLeft: "3 Episodes left",
-    },
-    {
-      id: 3,
-      title: "The Last of Us",
-      thumbnail:
-        "https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&q=80",
-      progress: 75,
-      episodesLeft: "2 Episodes left",
-    },
-    {
-      id: 4,
-      title: "Inception",
-      thumbnail:
-        "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&q=80",
-      progress: 88,
-      timeLeft: "19m",
-      totalTime: "2h 28m",
-    },
-  ],
+  items: [],
+  isLoading: false,
+  error: null,
+
+  fetchContinueWatching: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await getPopularMovies();
+      const items = data.results.slice(0, 6).map((movie, index) => ({
+        id: movie.id,
+        title: movie.title,
+        thumbnail: getImageUrl(movie.backdrop_path, "w500") || getImageUrl(movie.poster_path),
+        posterUrl: getImageUrl(movie.poster_path),
+        overview: movie.overview,
+        rating: movie.vote_average,
+        releaseDate: movie.release_date,
+        ...FAKE_PROGRESS[index % FAKE_PROGRESS.length],
+      }));
+      set({ items, isLoading: false });
+    } catch (err) {
+      set({ error: err.message, isLoading: false });
+    }
+  },
+
   removeItem: (id) =>
     set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
   updateProgress: (id, progress) =>
@@ -52,16 +51,40 @@ export const useWatchStore = create((set) => ({
 }));
 
 export default function ContinueWatching() {
-  const items = useWatchStore((s) => s.items);
+  const { items, isLoading, error, fetchContinueWatching } = useWatchStore();
   const scrollRef = useRef(null);
   const [showModal, setShowModal] = useState(false);
   const [activeId, setActiveId] = useState(null);
+
+  useEffect(() => {
+    fetchContinueWatching();
+  }, [fetchContinueWatching]);
 
   const activeItem = items.find((item) => item.id === activeId);
 
   const scroll = (dir) => {
     scrollRef.current?.scrollBy({ left: dir * 240, behavior: "smooth" });
   };
+
+  if (isLoading) {
+    return (
+      <section className="py-6 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <p className="text-gray-400 text-sm">Loading...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-6 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <p className="text-[#C8102E] text-sm">Failed to load: {error}</p>
+        </div>
+      </section>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -124,14 +147,14 @@ export default function ContinueWatching() {
           onClose={() => setShowModal(false)}
           onSelectMovie={(id) => {
             setActiveId(id);
-            setShowModal(false); // close the grid popup, show the detail modal on top
+            setShowModal(false);
           }}
         />
       )}
 
       {activeItem && (
         <MovieDetailModal
-          movie={{ ...activeItem, posterUrl: activeItem.thumbnail }}
+          movie={activeItem}
           onClose={() => setActiveId(null)}
           formatDuration={formatDuration}
         />
