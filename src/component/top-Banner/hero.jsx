@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaPlay } from "react-icons/fa";
+import { FaPlay, FaCheck } from "react-icons/fa";
 import { GiBat } from "react-icons/gi";
 import MovieCard from "./MovieCard";
 import GenreFilter from "./genre";
@@ -10,12 +10,7 @@ import Top10Section from "./top-ten/Top10Section";
 import NewReleasesSection from "./newReleaseSec/newRelease";
 import MovieDetailModal from "./newReleaseSec/movieDetailModal";
 import { formatDuration } from "../../utils/formateDuration";
-// import {
-//   fetchTrending,
-//   getPopularMovies,
-//   getMovieDetails,
-//   getImageUrl,
-// } from "../../../services/tmdb";
+import { useWatchlistStore } from "../../wishList/wishHiro/useWatchlistStore";
 import {
   fetchTrending,
   getPopularMovies,
@@ -33,7 +28,20 @@ export default function CineVaultHero() {
   const [movies, setMovies] = useState([]);
   const [rowLoading, setRowLoading] = useState(true);
 
+  // Selecting `items` (not `isInWatchlist`/`toggleItem` results) so this
+  // component actually re-renders when the watchlist changes — selecting a
+  // store *function* instead of the reactive data it reads internally is
+  // what silently broke the bookmark button in MovieDetailModal earlier;
+  // same trap, avoided here from the start.
+  const watchlistItems = useWatchlistStore((state) => state.items);
+  const toggleItem = useWatchlistStore((state) => state.toggleItem);
+
   const activeMovie = movies.find((movie) => movie.id === activeMovieId);
+
+  const featuredWatchlistId = featured ? String(featured.id) : null;
+  const isFeaturedSaved = featuredWatchlistId
+    ? watchlistItems.some((i) => i.id === featuredWatchlistId)
+    : false;
 
   // Featured hero — #1 from Trending (this week)
   useEffect(() => {
@@ -121,10 +129,29 @@ export default function CineVaultHero() {
     }
   };
 
+  const handleToggleMyList = () => {
+    if (!featured) return;
+    // NOTE: featured.runtime is already a formatted display string (e.g.
+    // "2h 5m") by the time it's set in loadFeatured — formatDuration was
+    // already applied there. It's stored as-is here, matching what
+    // WatchlistCard's metaLine expects to render directly (it does NOT
+    // call formatDuration itself). Do not reformat it again here.
+    toggleItem({
+      id: featuredWatchlistId,
+      slug: featured.slug,
+      title: featured.title,
+      type: "movie",
+      year: featured.year ? Number(featured.year) : null,
+      runtime: featured.runtime || null,
+      rating: featured.rating,
+      poster: featured.posterUrl,
+    });
+  };
+
   return (
     <div className="bg-white min-h-screen font-sans">
       <div className="relative overflow-hidden bg-white">
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_75%_50%,rgba(200,16,46,0.07)_0%,transparent_65%)]" />
+        <div className="absolute inset-0 pointer-events-none bg-[#F7F2F3] bg-[radial-gradient(ellipse_at_75%_50%,rgba(200,16,46,0.07)_0%,transparent_65%)]" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-14 flex flex-col gap-8 sm:gap-10">
           <div className="flex flex-col-reverse sm:flex-row items-center sm:items-center justify-between gap-6 sm:gap-10">
@@ -180,8 +207,17 @@ export default function CineVaultHero() {
                   <FaPlay size={14} color="white" />
                   Watch Now
                 </button>
-                <button className="flex items-center gap-2 px-5 sm:px-6 py-2.5 rounded-lg text-sm font-semibold text-gray-700 border border-gray-300 bg-white hover:bg-gray-50 transition-all active:scale-95">
-                  + My List
+                <button
+                  onClick={handleToggleMyList}
+                  disabled={featuredLoading}
+                  className={`flex items-center gap-2 px-5 sm:px-6 py-2.5 rounded-lg text-sm font-semibold border transition-all active:scale-95 disabled:opacity-50 ${
+                    isFeaturedSaved
+                      ? "bg-[#C8102E] border-[#C8102E] text-white"
+                      : "text-gray-700 border-gray-300 bg-white hover:bg-gray-50"
+                  }`}
+                >
+                  {isFeaturedSaved ? <FaCheck size={12} /> : null}
+                  {isFeaturedSaved ? "In My List" : "+ My List"}
                 </button>
               </div>
             </div>
@@ -209,7 +245,7 @@ export default function CineVaultHero() {
                 ? Array.from({ length: 10 }).map((_, i) => (
                     <div
                       key={i}
-                      className="w-[160px] h-[240px] bg-gray-200 rounded-lg animate-pulse flex-shrink-0"
+                      className="w-40 h-60 bg-gray-200 rounded-lg animate-pulse flex-shrink-0"
                     />
                   ))
                 : movies.map((movie) => (

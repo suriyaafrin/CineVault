@@ -96,3 +96,10 @@ export function getTVDetails(id) {
 export function getCollectionDetails(id) {
   return tmdbFetch(`/collection/${id}`);
 }
+export function searchMulti(query, page = 1) {
+  return tmdbFetch(`/search/multi`, {
+    query,
+    page,
+    include_adult: false,
+  });
+}

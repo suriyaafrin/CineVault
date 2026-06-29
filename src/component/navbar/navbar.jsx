@@ -10,6 +10,8 @@ import { FiUser } from "react-icons/fi";
 import { FiCheck } from "react-icons/fi";
 import SignInModal from "./signInModal";
 import SuccessModal from "./successModal";
+import SearchDropdown from "../top-Banner/searchDropdown";
+
 
 const useSearchStore = create((set) => ({
   query: "",
@@ -30,12 +32,26 @@ export default function Navbar() {
   const [authMode, setAuthMode] = useState("signin"); // which tab the modal opens on
   const [successInfo, setSuccessInfo] = useState(null); // { title, message } | null
   const [user, setUser] = useState(null); // null = logged out, string = display name/email
+  const [desktopSearchOpen, setDesktopSearchOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleSearch = (e) => {
     if (e.key === "Enter" && query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+      setDesktopSearchOpen(false);
+      setMobileSearchOpen(false);
     }
+    if (e.key === "Escape") {
+      setDesktopSearchOpen(false);
+      setMobileSearchOpen(false);
+    }
+  };
+
+  const clearQuery = () => {
+    setQuery("");
+    setDesktopSearchOpen(false);
+    setMobileSearchOpen(false);
   };
 
   const openSignIn = () => {
@@ -98,23 +114,32 @@ export default function Navbar() {
           ))}
         </ul>
         <div className="hidden md:flex items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-gray-100 border border-gray-200 hover:border-[#C8102E] rounded-md px-3 h-9">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleSearch}
-              placeholder="Search movies, series..."
-              className="bg-transparent text-[14px] outline-none w-36 lg:w-52 text-gray-800 placeholder-gray-400"
-            />
-            {query ? (
-              <FiX
-                size={15}
-                className="text-gray-400 cursor-pointer hover:text-[#C8102E] transition-colors"
-                onClick={() => setQuery("")}
+          <div className="relative">
+            <div className="flex items-center gap-1.5 bg-gray-100 border border-gray-200 hover:border-[#C8102E] rounded-md px-3 h-9">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleSearch}
+                onFocus={() => setDesktopSearchOpen(true)}
+                placeholder="Search movies, series..."
+                className="bg-transparent text-[14px] outline-none w-36 lg:w-52 text-gray-800 placeholder-gray-400"
               />
-            ) : (
-              <FiSearch size={15} className="text-gray-400" />
+              {query ? (
+                <FiX
+                  size={15}
+                  className="text-gray-400 cursor-pointer hover:text-[#C8102E] transition-colors"
+                  onClick={clearQuery}
+                />
+              ) : (
+                <FiSearch size={15} className="text-gray-400" />
+              )}
+            </div>
+            {desktopSearchOpen && (
+              <SearchDropdown
+                query={query}
+                onClose={() => setDesktopSearchOpen(false)}
+              />
             )}
           </div>
 
@@ -196,23 +221,32 @@ export default function Navbar() {
             ))}
           </ul>
 
-          <div className="flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-lg px-3 h-10 mt-3">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleSearch}
-              placeholder="Search movies, series..."
-              className="bg-transparent text-[14px] outline-none flex-1 text-gray-800 placeholder-gray-400"
-            />
-            {query ? (
-              <FiX
-                size={15}
-                className="text-gray-400 cursor-pointer hover:text-[#C8102E] transition-colors"
-                onClick={() => setQuery("")}
+          <div className="relative">
+            <div className="flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-lg px-3 h-10 mt-3">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleSearch}
+                onFocus={() => setMobileSearchOpen(true)}
+                placeholder="Search movies, series..."
+                className="bg-transparent text-[14px] outline-none flex-1 text-gray-800 placeholder-gray-400"
               />
-            ) : (
-              <FiSearch size={15} className="text-gray-400" />
+              {query ? (
+                <FiX
+                  size={15}
+                  className="text-gray-400 cursor-pointer hover:text-[#C8102E] transition-colors"
+                  onClick={clearQuery}
+                />
+              ) : (
+                <FiSearch size={15} className="text-gray-400" />
+              )}
+            </div>
+            {mobileSearchOpen && (
+              <SearchDropdown
+                query={query}
+                onClose={() => setMobileSearchOpen(false)}
+              />
             )}
           </div>
         </div>
