@@ -78,8 +78,6 @@ export function discoverTV({
   if (genreId) params.with_genres = genreId;
   if (yearGte) params["first_air_date.gte"] = `${yearGte}-01-01`;
   if (yearLte) params["first_air_date.lte"] = `${yearLte}-12-31`;
-  // Note: TV certifications use a different scheme (TV ratings, not MPAA);
-  // not wired here — see flag below.
   return tmdbFetch(`/discover/tv`, params);
 }
 

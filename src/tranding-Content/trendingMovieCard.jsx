@@ -14,14 +14,6 @@ function TrendingMovieCard({ item, onSelect }) {
       : null;
 
   return (
-    // NOTE: width is intentionally NOT set here anymore (no more
-    // w-28 sm:w-32 md:w-36 lg:w-40). It used to live on this root div,
-    // which silently overrode the *parent* wrapper's responsive
-    // w-[46%] sm:w-[30%] md:w-[22%] lg:w-[16%] sizing in TrendingSection —
-    // two competing sizing systems fighting each other, with this one
-    // always winning since it's more specific (fixed px vs %). Width now
-    // comes entirely from the parent; this component just fills it
-    // (w-full h-full) so there's a single source of truth for card size.
     <div className="relative w-full h-full cursor-pointer" onClick={() => onSelect?.(item)}>
       <MovieCard movie={item} />
 

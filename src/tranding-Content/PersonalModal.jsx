@@ -2,10 +2,6 @@ import { createPortal } from "react-dom";
 import { FaPlay, FaTimes } from "react-icons/fa";
 import { usePersonalStore } from "./usePersonalStore";
 
-// NOTE: This file didn't exist in what was shared with me — built fresh
-// based on usePersonalStore's shape and the Watch-now pattern already
-// established in MovieDetailModal. Double check markup/classes match your
-// existing modal styling conventions before shipping.
 function PersonalModal() {
   const activePersonalId = usePersonalStore((state) => state.activePersonalId);
   const personalItems = usePersonalStore((state) => state.personalItems);

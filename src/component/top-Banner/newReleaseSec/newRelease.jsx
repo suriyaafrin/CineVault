@@ -67,7 +67,7 @@ const NewReleasesSection = () => {
             ? Array.from({ length: 7 }).map((_, i) => (
                 <div
                   key={i}
-                  className="w-40 h-60 bg-white/10 rounded-lg animate-pulse flex-shrink-0"
+                  className="w-40 h-60 bg-white/10 rounded-lg animate-pulse shrink-0"
                 />
               ))
             : movies.map((movie) => (

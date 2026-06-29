@@ -61,7 +61,6 @@ const AllNewReleasesModal = ({ isOpen, onClose, movies = [] }) => {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="relative w-full max-w-5xl bg-white rounded-2xl border border-black/10 overflow-hidden shadow-2xl">
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-black/10">
           <h2 className="text-[#C8102E] text-lg font-bold">All New Releases</h2>
           <div className="flex items-center gap-3">
@@ -77,7 +76,6 @@ const AllNewReleasesModal = ({ isOpen, onClose, movies = [] }) => {
           </div>
         </div>
 
-        {/* Controls */}
         <div className="flex flex-wrap gap-2 px-6 py-3 border-b border-black/[0.07]">
           <select
             value={sort}
@@ -113,7 +111,6 @@ const AllNewReleasesModal = ({ isOpen, onClose, movies = [] }) => {
           </select>
         </div>
 
-        {/* Grid */}
         <div className="p-6">
           {paginated.length === 0 ? (
             <div className="text-center py-16 text-black/30 text-sm">
@@ -132,7 +129,6 @@ const AllNewReleasesModal = ({ isOpen, onClose, movies = [] }) => {
           )}
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 px-6 py-4 border-t border-black/[0.07]">
             <button
@@ -165,7 +161,6 @@ const AllNewReleasesModal = ({ isOpen, onClose, movies = [] }) => {
           </div>
         )}
 
-        {/* Detail Modal */}
         {selectedMovie && (
           <MovieDetailModal
             movie={selectedMovie}

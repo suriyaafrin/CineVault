@@ -29,8 +29,6 @@ function PersonalTrendingSection() {
 
       <div className="bg-white border border-gray-200 rounded-xl p-2 flex flex-col">
         {isLoading ? (
-          // Simple skeleton rows, matching the loading-placeholder pattern
-          // used elsewhere in the project rather than a single spinner.
           Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 p-2">
               <div className="h-14 w-10 shrink-0 animate-pulse rounded-md bg-gray-200" />

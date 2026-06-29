@@ -1,7 +1,4 @@
 import { create } from "zustand";
-
-// Mirrors the shape/pattern of useTrendingStore / useTop10Store.
-// Swap buzzItems with an API call later (async action) if needed.
 const buzzItems = [
   {
     id: 1,

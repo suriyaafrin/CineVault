@@ -2,12 +2,9 @@ import { create } from "zustand";
 
 export const useWatchlistStore = create((set, get) => ({
   items: [],
-
-  // tab: "all" | "movie" | "series"
   activeTab: "all",
   setActiveTab: (tab) => set({ activeTab: tab }),
 
-  // sortBy: "recent" | "rating" | "az"
   sortBy: "recent",
   setSortBy: (sortBy) => set({ sortBy }),
 

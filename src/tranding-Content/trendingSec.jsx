@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaChevronRight, FaChevronLeft, FaTimes } from "react-icons/fa";
-
 import TrendingMovieCard from "./trendingMovieCard";
 import { useTrendingStore } from "./useTewndingStore";
 import { formatDuration } from "../utils/formateDuration";
@@ -24,13 +23,9 @@ function TrendingSection() {
 
   useEffect(() => {
     fetchTrendingItems();
-    // fetchTrendingItems is stable (defined once by create()), safe to omit
-    // from deps — including it would be fine too, just being explicit here.
   }, [fetchTrendingItems]);
 
-  // Derived/filtered list is computed here (not in the store) and memoized,
-  // so we only get a new array when items or activeCategory actually change —
-  // this is what prevents the "Maximum update depth exceeded" loop.
+ 
   const items = useMemo(() => {
     if (activeCategory === "all") return allItems;
     return allItems.filter((item) => item.type === activeCategory);
@@ -121,15 +116,11 @@ function TrendingSection() {
           className="flex snap-x snap-mandatory gap-3 sm:gap-4 overflow-x-auto scroll-smooth pb-2 [-ms-overflow-style:none] [scrollbar-none] [&::-webkit-scrollbar]:hidden"
         >
           {isLoading ? (
-            // Lightweight skeleton placeholders, matching the pattern used
-            // elsewhere (e.g. the original ContinueWatching/TrendingSection
-            // loading states) rather than a single spinner. Widths match
-            // the real card widths below so the loading state doesn't
-            // jump/reflow once data arrives.
+            
             Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="aspect-[2/3] w-[31%] shrink-0 animate-pulse rounded-md bg-slate-200 sm:w-[23%] md:w-[18%] lg:w-[15%]"
+                className="aspect-2/3 w-[31%] shrink-0 animate-pulse rounded-md bg-slate-200 sm:w-[23%] md:w-[18%] lg:w-[15%]"
               />
             ))
           ) : error ? (
@@ -144,11 +135,6 @@ function TrendingSection() {
             items.map((item) => (
               <div
                 key={item.id}
-                // Mobile: ~3 cards visible at once (31%, leaving room for
-                // gap-3 between them) instead of the old 46% (~2 cards),
-                // which is what was making the row feel cramped/oversized
-                // on small screens. Scales up through the breakpoints to
-                // match the original desktop density.
                 className="w-[31%] shrink-0 snap-start sm:w-[23%] md:w-[18%] lg:w-[15%]"
               >
                 <TrendingMovieCard item={item} onSelect={handleSelect} />

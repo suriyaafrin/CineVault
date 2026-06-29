@@ -45,8 +45,6 @@ export default function WatchlistCard({ item, onOpen }) {
 
         <button
           onClick={(e) => {
-            // Stop the click from also bubbling up to the card's onClick,
-            // which would open the detail modal right as the item is removed.
             e.stopPropagation();
             removeItem(item.id);
           }}

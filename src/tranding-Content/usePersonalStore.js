@@ -6,15 +6,6 @@ import {
   getTVDetails,
   getImageUrl,
 } from "../services/tmdb";
-// NOTE: import path depth guessed to match the established 3-levels-under-src
-// convention used elsewhere in the project. Verify against this file's
-// actual location before running.
-
-// There's no real "personalized to this user" endpoint available (no watch
-// history / auth-scoped recommendation API wired up), so this uses top-rated
-// movies + TV as an honest stand-in for "Recommended for you" rather than
-// pretending to be personalized. Swap this for a real recommendations
-// endpoint later if/when user watch history is tracked server-side.
 function mapPersonalItem(raw, isMovie, rank) {
   const title = isMovie ? raw.title : raw.name;
   return {
@@ -32,18 +23,16 @@ function mapPersonalItem(raw, isMovie, rank) {
 }
 
 export const usePersonalStore = create((set, get) => ({
-  // ---- state ----
+
   personalItems: [],
   activePersonalId: null,
   isLoading: false,
   error: null,
 
-  // Detail cache for the active item — holds trailer/genre/runtime info
-  // fetched lazily when a modal opens, same pattern as MovieDetailModal.
-  activeDetails: null,
+  
   isLoadingDetails: false,
 
-  // ---- actions ----
+
   fetchPersonalItems: async () => {
     set({ isLoading: true, error: null });
     try {

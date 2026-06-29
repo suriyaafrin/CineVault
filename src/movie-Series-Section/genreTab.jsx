@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-// import { getMovieGenres, getTVGenres } from "../../../services/tmdb";
 import { useExploreStore } from "./useExploreStore";
 import { getMovieGenres, getTVGenres } from "../services/tmdb"
 

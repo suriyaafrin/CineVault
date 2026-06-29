@@ -1,7 +1,4 @@
 import { useGlobalStore } from "./useGlobalStore";
-
-// Fixed x/y positions on the 800x400 viewBox below, hand-placed to
-// roughly match each region on the simplified world silhouette.
 const pinPositions = {
   "Southeast Asia": { x: 600, y: 200 },
   "North America": { x: 180, y: 130 },
@@ -21,7 +18,7 @@ function HotspotMap() {
         role="img"
         aria-label="World map showing regions with trending content"
       >
-        {/* simplified landmass silhouettes, decorative only */}
+       
         <ellipse cx="190" cy="150" rx="95" ry="60" fill="#22252B" />
         <ellipse cx="250" cy="290" rx="70" ry="55" fill="#22252B" />
         <ellipse cx="390" cy="120" rx="55" ry="40" fill="#22252B" />

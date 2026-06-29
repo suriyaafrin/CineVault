@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { FaPlay, FaCheck } from "react-icons/fa";
 import { GiBat } from "react-icons/gi";
 import MovieCard from "./MovieCard";
-import GenreFilter from "./genre";
 import { ScrollRow } from "./scrollRow";
 import TrendingSection from "./tranding";
 import ContinueWatching from "./continue-Watching";
@@ -28,11 +27,6 @@ export default function CineVaultHero() {
   const [movies, setMovies] = useState([]);
   const [rowLoading, setRowLoading] = useState(true);
 
-  // Selecting `items` (not `isInWatchlist`/`toggleItem` results) so this
-  // component actually re-renders when the watchlist changes — selecting a
-  // store *function* instead of the reactive data it reads internally is
-  // what silently broke the bookmark button in MovieDetailModal earlier;
-  // same trap, avoided here from the start.
   const watchlistItems = useWatchlistStore((state) => state.items);
   const toggleItem = useWatchlistStore((state) => state.toggleItem);
 
@@ -43,7 +37,7 @@ export default function CineVaultHero() {
     ? watchlistItems.some((i) => i.id === featuredWatchlistId)
     : false;
 
-  // Featured hero — #1 from Trending (this week)
+ 
   useEffect(() => {
     let isMounted = true;
 
@@ -80,7 +74,6 @@ export default function CineVaultHero() {
     };
   }, []);
 
-  // Row below hero — Popular movies
   useEffect(() => {
     let isMounted = true;
 
@@ -131,11 +124,6 @@ export default function CineVaultHero() {
 
   const handleToggleMyList = () => {
     if (!featured) return;
-    // NOTE: featured.runtime is already a formatted display string (e.g.
-    // "2h 5m") by the time it's set in loadFeatured — formatDuration was
-    // already applied there. It's stored as-is here, matching what
-    // WatchlistCard's metaLine expects to render directly (it does NOT
-    // call formatDuration itself). Do not reformat it again here.
     toggleItem({
       id: featuredWatchlistId,
       slug: featured.slug,
@@ -245,7 +233,7 @@ export default function CineVaultHero() {
                 ? Array.from({ length: 10 }).map((_, i) => (
                     <div
                       key={i}
-                      className="w-40 h-60 bg-gray-200 rounded-lg animate-pulse flex-shrink-0"
+                      className="w-40 h-60 bg-gray-200 rounded-lg animate-pulse shrink-0"
                     />
                   ))
                 : movies.map((movie) => (
@@ -261,7 +249,6 @@ export default function CineVaultHero() {
         </div>
       </div>
 
-      <GenreFilter />
       <TrendingSection />
       <ContinueWatching />
       <Top10Section />

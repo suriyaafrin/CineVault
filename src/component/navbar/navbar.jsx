@@ -87,7 +87,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
+    <nav className="w-full bg-[#F7F2F3] border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <NavLink
           to="/"

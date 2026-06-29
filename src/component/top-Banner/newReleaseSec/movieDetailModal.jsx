@@ -7,12 +7,6 @@ import { useWatchlistStore } from "../../../wishList/wishHiro/useWatchlistStore"
 const MovieDetailModal = ({ movie, onClose, formatDuration, type = "movie" }) => {
   const [details, setDetails] = useState(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(true);
-
-  // FIX: select the reactive `items` array itself, not the `isInWatchlist`
-  // function. Zustand only re-renders when the *selected value* changes
-  // between renders -- selecting a stable function reference (which never
-  // changes) means React never re-renders this component when items
-  // changes, even though the underlying state is updating correctly.
   const items = useWatchlistStore((state) => state.items);
   const toggleItem = useWatchlistStore((state) => state.toggleItem);
 
@@ -42,7 +36,6 @@ const MovieDetailModal = ({ movie, onClose, formatDuration, type = "movie" }) =>
 
   const year = movie.releaseDate ? movie.releaseDate.slice(0, 4) : null;
   const genreNames = details?.genres?.map((g) => g.name).join(", ") || null;
-  // Movies expose runtime directly; TV exposes episode_run_time as an array
   const runtime =
     type === "series"
       ? details?.episode_run_time?.[0] || null
@@ -59,10 +52,6 @@ const MovieDetailModal = ({ movie, onClose, formatDuration, type = "movie" }) =>
   };
 
   const watchlistId = String(movie.id);
-  // FIX: derive `saved` from the reactive `items` array (selected above),
-  // not from calling the store's isInWatchlist() helper directly. This
-  // recomputes correctly on every render because `items` is now the thing
-  // React is actually watching.
   const saved = items.some((i) => i.id === watchlistId);
 
   const handleToggleWatchlist = () => {

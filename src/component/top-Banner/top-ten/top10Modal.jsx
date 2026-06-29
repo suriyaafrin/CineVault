@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { MdClose, MdPlayArrow, MdAdd, MdLocalFireDepartment } from "react-icons/md";
+import { MdClose, MdPlayArrow, MdAdd, MdCheck, MdLocalFireDepartment } from "react-icons/md";
 import { useTop10Store } from "./useTop10Store";
+import { useWatchlistStore } from "../../../wishList/wishHiro/useWatchlistStore";
 import MovieDetailModal from "../newReleaseSec/movieDetailModal";
 import { formatDuration } from "../../../utils/formateDuration";
 
@@ -10,6 +11,9 @@ const Top10Modal = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState("Movies");
   const [activeId, setActiveId] = useState(null);
   const { movieItems, tvItems, fetchTop10, fetchTop10TV } = useTop10Store();
+
+  const watchlistItems = useWatchlistStore((state) => state.items);
+  const toggleItem = useWatchlistStore((state) => state.toggleItem);
 
   useEffect(() => {
     if (movieItems.length === 0) fetchTop10();
@@ -25,6 +29,23 @@ const Top10Modal = ({ onClose }) => {
   const featured = items[0];
   const rest = items.slice(1, 10);
   const activeMovie = items.find((m) => m.id === activeId);
+
+ 
+  const isSaved = (movie) =>
+    watchlistItems.some((i) => i.id === String(movie.id));
+
+  const handleToggleWatchlist = (movie, type = "movie") => {
+    const year = movie.releaseDate ? Number(movie.releaseDate.slice(0, 4)) : null;
+    toggleItem({
+      id: String(movie.id),
+      slug: movie.slug,
+      title: movie.title,
+      type,
+      year,
+      rating: movie.rating,
+      poster: movie.posterUrl,
+    });
+  };
 
   return (
     <div
@@ -113,8 +134,16 @@ const Top10Modal = ({ onClose }) => {
                     >
                       <MdPlayArrow size={15} /> Watch now
                     </button>
-                    <button className="flex items-center gap-1.5 border border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-gray-300 text-[12px] font-medium px-3.5 py-1.5 rounded-full hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
-                      <MdAdd size={15} /> My list
+                    <button
+                      onClick={() => handleToggleWatchlist(featured)}
+                      className={`flex items-center gap-1.5 text-[12px] font-medium px-3.5 py-1.5 rounded-full transition-colors ${
+                        isSaved(featured)
+                          ? "bg-[#C8102E] border border-[#C8102E] text-white"
+                          : "border border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800"
+                      }`}
+                    >
+                      {isSaved(featured) ? <MdCheck size={15} /> : <MdAdd size={15} />}
+                      {isSaved(featured) ? "In my list" : "My list"}
                     </button>
                   </div>
                 </div>
@@ -124,6 +153,7 @@ const Top10Modal = ({ onClose }) => {
               <div className="grid grid-cols-2 gap-2.5">
                 {rest.map((movie, index) => {
                   const rank = String(index + 2).padStart(2, "0");
+                  const saved = isSaved(movie);
                   return (
                     <div
                       key={movie.id}
@@ -163,8 +193,16 @@ const Top10Modal = ({ onClose }) => {
                         >
                           <MdPlayArrow size={13} /> Watch now
                         </button>
-                        <button className="flex-1 flex items-center justify-center gap-1 border border-gray-200 dark:border-zinc-600 text-gray-700 dark:text-gray-300 text-[11px] font-medium py-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors">
-                          <MdAdd size={13} /> My list
+                        <button
+                          onClick={() => handleToggleWatchlist(movie)}
+                          className={`flex-1 flex items-center justify-center gap-1 text-[11px] font-medium py-1.5 rounded-full transition-colors ${
+                            saved
+                              ? "bg-[#C8102E] border border-[#C8102E] text-white"
+                              : "border border-gray-200 dark:border-zinc-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-700"
+                          }`}
+                        >
+                          {saved ? <MdCheck size={13} /> : <MdAdd size={13} />}
+                          {saved ? "Added" : "My list"}
                         </button>
                       </div>
                     </div>

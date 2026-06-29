@@ -7,7 +7,7 @@ import MovieDetailModal from "../newReleaseSec/movieDetailModal";
 import { formatDuration } from "../../../utils/formateDuration";
 import { getPopularMovies, getImageUrl } from "../../../services/tmdb";
 
-// Fake progress data to simulate watch history, cycled across fetched movies
+
 const FAKE_PROGRESS = [
   { progress: 62, timeLeft: "1h 12m", totalTime: "2h 56m" },
   { progress: 33, episodesLeft: "3 Episodes left" },

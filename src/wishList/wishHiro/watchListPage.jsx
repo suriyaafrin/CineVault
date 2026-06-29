@@ -4,9 +4,6 @@ import { useWatchlistStore } from "./useWatchlistStore";
 import WatchlistCard from "./watchListCard";
 import MovieDetailModal from "../../component/top-Banner/newReleaseSec/movieDetailModal";
 import { formatDuration } from "../../utils/formateDuration";
-// NOTE: both import paths above are guessed based on the depth used
-// elsewhere in the project (this file lives in src/wishList/wishHiro/ per
-// earlier confirmation). Double-check before running.
 
 const TABS = [
   { key: "all", label: "All Content" },
@@ -55,12 +52,6 @@ export default function WatchlistPage() {
     return result;
   }, [items, activeTab, searchQuery, sortBy]);
 
-  // MovieDetailModal expects `posterUrl` and `releaseDate`, but watchlist
-  // items are stored as `poster` and `year` (see handleToggleWatchlist in
-  // MovieDetailModal — that's the shape toggleItem actually saves). This
-  // adapter maps the stored shape back to what the modal reads, rather than
-  // changing the storage shape itself, since other watchlist UI (cards,
-  // sort-by-year) already depends on `year`/`poster` directly.
   const handleOpen = (item) => {
     setActiveItem({
       ...item,
@@ -71,18 +62,16 @@ export default function WatchlistPage() {
 
   return (
     <section className="relative bg-white">
-      {/* Background banner */}
-      <div className="absolute inset-0 h-48 sm:h-56 lg:h-64 bg-linear-to-b" />
 
+      <div className="absolute inset-0 h-48 sm:h-56 lg:h-64 bg-linear-to-b" />
       <div className="relative max-w-6xl mx-auto px-4 sm:px-8 pt-8 sm:pt-10 pb-12 sm:pb-16">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#C8102E]">
             My Watchlist
           </h1>      
         </div>
 
-        {/* Tabs + Sort row */}
+
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
           <div className="flex items-center gap-2 overflow-x-auto pb-1 -mb-1 sm:pb-0 sm:mb-0 scrollbar-hide">
             {TABS.map((tab) => (
@@ -116,7 +105,6 @@ export default function WatchlistPage() {
           </div>
         </div>
 
-        {/* Search */}
         <div className="relative mb-8 w-full sm:max-w-2xl">
           <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[#C8102E] w-4 h-4" />
           <input
@@ -128,7 +116,6 @@ export default function WatchlistPage() {
           />
         </div>
 
-        {/* Grid */}
         {visibleItems.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 sm:gap-4">
             {visibleItems.map((item) => (

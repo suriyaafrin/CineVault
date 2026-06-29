@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { FaPlay, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-// import { fetchTrending, getImageUrl } from "../services/tmdb";
 import MovieDetailModal from "../component/top-Banner/newReleaseSec/movieDetailModal";
 import { formatDuration } from "../utils/formateDuration";
 import { fetchTrending, getImageUrl } from "../services/tmdb"

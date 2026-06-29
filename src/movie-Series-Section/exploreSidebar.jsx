@@ -15,15 +15,15 @@ export default function ExploreSidebar({ type = "movie" }) {
 
     async function loadSidebarData() {
       try {
-        // Collections: TMDb has no "series collections" concept, and no
-        // global "list top collections" endpoint — only fetch for movies.
         const collectionsPromise = isSeries
           ? Promise.resolve([])
-          : Promise.all(
+          : Promise.allSettled(
               FEATURED_MOVIE_COLLECTION_IDS.map((id) => getCollectionDetails(id))
+            ).then((results) =>
+              results
+                .filter((r) => r.status === "fulfilled")
+                .map((r) => r.value)
             );
-
-        // New Additions: reuse the same "now playing" pattern as NewReleasesSection
         const newAdditionsPromise = getNowPlayingMovies();
 
         const [collectionResults, newAdditionsData] = await Promise.all([

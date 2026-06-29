@@ -5,9 +5,6 @@ import {
   getTVGenres,
   getImageUrl,
 } from "../services/tmdb";
-// NOTE: import path depth guessed to match the established 3-levels-under-src
-// convention from past sessions. Double-check against this file's actual
-// folder location before running.
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -22,9 +19,6 @@ function mapTrendingItem(raw, genreMap) {
     .map((id) => genreMap[id])
     .filter(Boolean);
 
-  // slug mirrors the title+id convention used elsewhere in the project
-  // (see slugify.js) so items opened from Trending behave the same way
-  // in the watchlist as items opened from other sections.
   const slug =
     `${title}`
       .toLowerCase()
@@ -37,8 +31,6 @@ function mapTrendingItem(raw, genreMap) {
     slug,
     type: isMovie ? "movie" : "series",
     year,
-    // MovieDetailModal reads movie.releaseDate directly (not year),
-    // so the raw date string needs to be carried through too.
     releaseDate: dateStr || null,
     rating: raw.vote_average,
     overview: raw.overview || null,
@@ -50,18 +42,14 @@ function mapTrendingItem(raw, genreMap) {
 }
 
 export const useTrendingStore = create((set, get) => ({
-  // ---- state ----
   activeCategory: "all",
   items: [],
   genreMap: {},
   isLoading: false,
   error: null,
-
-  // ---- actions ----
   setActiveCategory: (category) => set({ activeCategory: category }),
 
   fetchGenreMap: async () => {
-    // Skip refetch if already populated.
     if (Object.keys(get().genreMap).length > 0) return get().genreMap;
 
     try {
@@ -71,11 +59,6 @@ export const useTrendingStore = create((set, get) => ({
       ]);
 
       const map = {};
-      // Movie and TV genre id spaces overlap but aren't identical
-      // (e.g. some ids only exist on one side). Merging both into a
-      // single map is fine here since each item only looks up the ids
-      // relevant to its own media_type, but if a movie and a TV genre
-      // ever share an id with different names, the later merge wins.
       [...(movieGenres.genres || []), ...(tvGenres.genres || [])].forEach(
         (g) => {
           map[g.id] = g.name;
@@ -96,8 +79,6 @@ export const useTrendingStore = create((set, get) => ({
       const genreMap = await get().fetchGenreMap();
       const data = await fetchTrending("all", "week");
       const mapped = (data.results || [])
-        // trending/all can include "person" results — filter those out,
-        // this row only renders movies/series.
         .filter((r) => r.media_type === "movie" || r.media_type === "tv")
         .map((raw) => mapTrendingItem(raw, genreMap));
 
@@ -107,12 +88,4 @@ export const useTrendingStore = create((set, get) => ({
       set({ error: err.message, isLoading: false });
     }
   },
-
-  // NOTE: filtering is intentionally NOT done here.
-  // A method that returns `items.filter(...)` creates a brand-new array
-  // reference on every call. When used inside a Zustand selector
-  // (e.g. `useTrendingStore((state) => state.getFilteredItems())`),
-  // that new reference looks like a "state change" every render,
-  // which triggers another render, which calls it again — infinite loop.
-  // Filtering happens in the component via useMemo instead.
 }));

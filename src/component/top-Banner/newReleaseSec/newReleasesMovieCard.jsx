@@ -1,7 +1,7 @@
 export const MovieCard = ({ movie, onClick }) => (
   <div
     onClick={onClick}
-    className="relative rounded-lg overflow-hidden cursor-pointer group aspect-[2/3] bg-[#1a1a1f]"
+    className="relative rounded-lg overflow-hidden cursor-pointer group aspect-2/3 bg-[#1a1a1f]"
   >
     {movie.posterUrl ? (
       <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover" />
@@ -10,7 +10,7 @@ export const MovieCard = ({ movie, onClick }) => (
         <span className="text-[10px] font-semibold text-white/60 text-center leading-tight">{movie.title}</span>
       </div>
     )}
-    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-2">
+    <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-2">
       <p className="text-white text-[10px] font-medium leading-tight">{movie.title}</p>
       <p className="text-white/50 text-[9px] mt-0.5">{movie.year}</p>
     </div>

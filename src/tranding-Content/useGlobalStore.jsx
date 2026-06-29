@@ -1,7 +1,4 @@
 import { create } from "zustand";
-
-// Mirrors useCommunityStore / useTrendingStore shape.
-// Swap hotspots with an API call later (async action) if needed.
 const hotspots = [
   {
     id: 1,

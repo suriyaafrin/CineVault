@@ -5,10 +5,6 @@ import { slugify } from "../../utils/slugify";
 import { formatDuration } from "../../utils/formateDuration";
 import MovieDetailModal from "./newReleaseSec/movieDetailModal";
 
-// Maps a raw TMDb /search/multi result (movie OR tv shape) into the flat
-// shape MovieDetailModal expects everywhere else in the app (posterUrl,
-// releaseDate, rating, slug, etc). Mirrors the mapping conventions already
-// used in TrendingSection / Top10Section.
 function mapResult(raw) {
   const isTV = raw.media_type === "tv";
   const title = isTV ? raw.name : raw.title;
@@ -23,9 +19,6 @@ function mapResult(raw) {
     releaseDate,
     rating: raw.vote_average,
     type: isTV ? "series" : "movie",
-    // includeYear: true here (unlike GenreFilter's slugify(title, id) call,
-    // which doesn't match this file's actual signature) since search
-    // results are far more likely to collide on title across years/media.
     slug: slugify(title, { year, includeYear: true }),
   };
 }
@@ -72,13 +65,7 @@ export default function SearchDropdown({ query, onClose }) {
     return () => clearTimeout(debounceRef.current);
   }, [query]);
 
-  // Close dropdown on outside click.
-  // Skipped entirely while a modal is open: MovieDetailModal renders via
-  // createPortal(..., document.body), so its buttons (Watch Now, bookmark)
-  // are NOT descendants of containerRef in the DOM tree even though they
-  // visually appear "inside" the dropdown. Without this guard, every click
-  // inside the modal gets misread as an outside click and closes both the
-  // modal and the dropdown.
+ 
   useEffect(() => {
     if (activeItem) return;
 

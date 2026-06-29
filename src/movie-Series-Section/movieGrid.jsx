@@ -40,7 +40,7 @@ export default function MovieGrid({ type = "movie", onMovieClick }) {
           yearLte,
         };
 
-        // Age rating only applies to movies — TV uses a different cert scheme
+        
         if (type !== "series" && ageRating !== "All") {
           params.certification = ageRating;
         }
